@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'models.dart';
 
 class AddMedicineDialog extends StatefulWidget {
-  const AddMedicineDialog({super.key});
+  final Medicine? medicine; // 添加可选的medicine参数用于编辑
+
+  const AddMedicineDialog({super.key, this.medicine});
 
   @override
   State<AddMedicineDialog> createState() => _AddMedicineDialogState();
 }
 
 class _AddMedicineDialogState extends State<AddMedicineDialog> {
-  final _nameController = TextEditingController();
-  final _dosageController = TextEditingController();
-  final _scheduleController = TextEditingController();
-  TimeOfDay _selectedTime = TimeOfDay(hour: 8, minute: 0);
+  late final _nameController = TextEditingController(text: widget.medicine?.name ?? '');
+  late final _dosageController = TextEditingController(text: widget.medicine?.dosage ?? '');
+  late final _scheduleController = TextEditingController(text: widget.medicine?.schedule ?? '');
+  late TimeOfDay _selectedTime = widget.medicine?.time ?? TimeOfDay(hour: 8, minute: 0);
 
   Future<void> _selectTime(BuildContext context) async {
     final TimeOfDay? picked = await showTimePicker(
@@ -28,8 +30,10 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.medicine != null;
+    
     return AlertDialog(
-      title: const Text('添加药物'),
+      title: Text(isEditing ? '编辑药物' : '添加药物'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -80,7 +84,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               Navigator.of(context).pop(newMedicine);
             }
           },
-          child: const Text('添加'),
+          child: Text(isEditing ? '更新' : '添加'),
         ),
       ],
     );
