@@ -57,6 +57,61 @@ class _MedicinePageState extends State<MedicinePage> {
     });
   }
 
+  void _editMedicine(int index) {
+    // 编辑药物的函数
+    final medicineToEdit = _medicines[index];
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AddMedicineDialog(medicine: medicineToEdit);
+      },
+    ).then((updatedMedicine) {
+      if (updatedMedicine != null) {
+        setState(() {
+          _medicines[index] = updatedMedicine;
+        });
+        _saveMedicines();
+      }
+    });
+  }
+
+  void _deleteMedicine(int index) {
+    // 删除药物的函数
+    setState(() {
+      _medicines.removeAt(index);
+    });
+    _saveMedicines();
+  }
+
+  void _showDeleteConfirmationDialog(int index) {
+    final medicineName = _medicines[index].name;
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('确认删除'),
+          content: Text('确定要删除药物 "$medicineName" 吗？'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteMedicine(index);
+              },
+              child: const Text('删除'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,7 +154,20 @@ class _MedicinePageState extends State<MedicinePage> {
                               title: Text(medicine.name),
                               subtitle: Text(
                                   '${medicine.dosage} - ${medicine.schedule}'),
-                              trailing: Text(
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, size: 20),
+                                    onPressed: () => _editMedicine(index),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, size: 20),
+                                    onPressed: () => _showDeleteConfirmationDialog(index),
+                                  ),
+                                ],
+                              ),
+                              leading: Text(
                                 '${medicine.time.hour}:${medicine.time.minute.toString().padLeft(2, '0')}',
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
