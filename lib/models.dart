@@ -154,3 +154,17 @@ class HealthRecord {
     );
   }
 }
+
+/// 应用主题模式枚举
+///
+/// 用于定义应用支持的主题模式：浅色、深色和跟随系统
+enum AppThemeMode {
+  /// 浅色主题
+  light,
+  
+  /// 深色主题
+  dark,
+  
+  /// 跟随系统设置
+  system,
+}
