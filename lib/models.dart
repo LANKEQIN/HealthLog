@@ -25,8 +25,10 @@ class Medicine {
   /// 服药时间列表
   final List<TimeOfDay> scheduleTimes;
 
+  /*
   /// 是否饭前服用
   final bool beforeMeal;
+  */
 
   /// 用药开始日期
   final DateTime? startDate;
@@ -58,7 +60,7 @@ class Medicine {
     required this.time,
     this.timesPerDay = 1,
     List<TimeOfDay>? scheduleTimes,
-    this.beforeMeal = false,
+    /* this.beforeMeal = false, */
     this.startDate,
     this.endDate,
     List<MedicineScheduleType>? scheduleTypes,
@@ -84,7 +86,7 @@ class Medicine {
         'hour': time.hour,
         'minute': time.minute,
       }).toList(),
-      'beforeMeal': beforeMeal,
+      /* 'beforeMeal': beforeMeal, */
       'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
       'scheduleTypes': scheduleTypes.map((type) => type.index).toList(),
@@ -120,7 +122,7 @@ class Medicine {
       ),
       timesPerDay: json['timesPerDay'] ?? 1,
       scheduleTimes: times,
-      beforeMeal: json['beforeMeal'] ?? false,
+      /* beforeMeal: json['beforeMeal'] ?? false, */
       startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
       endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
       scheduleTypes: types,

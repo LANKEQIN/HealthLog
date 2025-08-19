@@ -223,114 +223,166 @@ class _MedicinePageState extends State<MedicinePage> {
                       itemBuilder: (context, index) {
                           final medicine = _medicines[index];
                           return Card(
-                            child: ListTile(
-                              title: Text(medicine.name),
-                              subtitle: Column(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('${medicine.dosage}${medicine.dosageUnit} - ${medicine.schedule}'),
-                                  const SizedBox(height: 4),
-                                  // 显示用药周期
-                                  if (medicine.startDate != null || medicine.endDate != null) ...[
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.date_range, size: 16),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '${medicine.startDate != null ? _formatDate(medicine.startDate!) : '?'} - ${medicine.endDate != null ? _formatDate(medicine.endDate!) : '?'}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                  ],
-                                  // 显示服药时间和饭前饭后信息
+                                  // 药品名称和剂量
                                   Row(
                                     children: [
-                                      Text(
-                                        '${medicine.timesPerDay}次/天',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
+                                      Expanded(
+                                        child: Text(
+                                          medicine.name,
+                                          style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
                                       Text(
-                                        medicine.beforeMeal ? '饭前' : '饭后',
+                                        '${medicine.dosage}${medicine.dosageUnit}',
                                         style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 4),
-                                  // 显示细化的服药时间类型
-                                  if (medicine.scheduleTypes.isNotEmpty) ...[
-                                    SizedBox(
-                                      height: 20,
-                                      child: ListView(
-                                        scrollDirection: Axis.horizontal,
-                                        children: medicine.scheduleTypes.map((type) {
-                                          return Container(
-                                            margin: const EdgeInsets.only(right: 8),
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green[100],
-                                              borderRadius: BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              _getScheduleTypeText(type),
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.green,
-                                              ),
-                                            ),
-                                          );
-                                        }).toList(),
-                                      ),
+                                  const SizedBox(height: 8),
+                                  
+                                  // 服用说明
+                                  Text(
+                                    medicine.schedule,
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.grey,
                                     ),
-                                    const SizedBox(height: 4),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  
+                                  // 用药周期
+                                  if (medicine.startDate != null || medicine.endDate != null) ...[
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.date_range, size: 18, color: Colors.blue),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '${medicine.startDate != null ? _formatDate(medicine.startDate!) : '?'} - ${medicine.endDate != null ? _formatDate(medicine.endDate!) : '?'}',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
                                   ],
-                                  // 显示服药时间列表
+                                  
+                                  // 每日次数和饭前饭后信息
+                                  Row(
+                                    children: [
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue[100],
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          '${medicine.timesPerDay}次/天',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blue,
+                                          ),
+                                        ),
+                                      ),
+                                      /*
+                                      const SizedBox(width: 12),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          color: medicine.beforeMeal ? Colors.orange[100] : Colors.green[100],
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          medicine.beforeMeal ? '饭前' : '饭后',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                      */
+                                    ],
+                                  ),
+                                  const SizedBox(height: 12),
+                                  
+                                  // 细化的服药时间类型
+                                  if (medicine.scheduleTypes.isNotEmpty) ...[
+                                    Wrap(
+                                      spacing: 6,
+                                      runSpacing: 4,
+                                      children: medicine.scheduleTypes.map((type) {
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green[100],
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            _getScheduleTypeText(type),
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.green,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                    const SizedBox(height: 8),
+                                  ],
+                                  
+                                  // 服药时间列表
                                   SizedBox(
-                                    height: 20,
+                                    height: 30,
                                     child: ListView(
                                       scrollDirection: Axis.horizontal,
                                       children: medicine.scheduleTimes.map((time) {
                                         return Container(
                                           margin: const EdgeInsets.only(right: 8),
-                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                                           decoration: BoxDecoration(
                                             color: Colors.grey[200],
-                                            borderRadius: BorderRadius.circular(4),
+                                            borderRadius: BorderRadius.circular(6),
                                           ),
                                           child: Text(
                                             _formatTime(time),
                                             style: const TextStyle(
-                                              fontSize: 12,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                         );
                                       }).toList(),
                                     ),
                                   ),
-                                ],
-                              ),
-                              trailing: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.edit, size: 20),
-                                    onPressed: () => _editMedicine(index),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.delete, size: 20),
-                                    onPressed: () => _showDeleteConfirmationDialog(index),
+                                  
+                                  // 分隔线和操作按钮
+                                  const Divider(height: 24),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.edit, size: 20),
+                                        onPressed: () => _editMedicine(index),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete, size: 20),
+                                        onPressed: () => _showDeleteConfirmationDialog(index),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

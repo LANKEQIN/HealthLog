@@ -43,7 +43,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   late List<TimeOfDay> _scheduleTimes = List<TimeOfDay>.from(widget.medicine?.scheduleTimes ?? [_selectedTime]);
   
   /// 是否饭前服用
-  late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
+  // late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
   
   /// 剂量单位
   late String _dosageUnit = widget.medicine?.dosageUnit ?? '毫克';
@@ -368,27 +368,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
             ),
             const SizedBox(height: 10),
             // 饭前饭后选择（保留以保持向后兼容性）
-            ListTile(
-              title: const Text('服用时间'),
-              trailing: ToggleButtons(
-                isSelected: [_beforeMeal, !_beforeMeal],
-                onPressed: (int index) {
-                  setState(() {
-                    _beforeMeal = index == 0;
-                  });
-                },
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('饭前'),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('饭后'),
-                  ),
-                ],
-              ),
-            ),
+
           ],
         ),
       ),
@@ -426,7 +406,6 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 time: _selectedTime,
                 timesPerDay: _timesPerDay,
                 scheduleTimes: List<TimeOfDay>.from(_scheduleTimes),
-                beforeMeal: _beforeMeal,
                 startDate: _startDate,
                 endDate: _endDate,
                 scheduleTypes: List<MedicineScheduleType>.from(_scheduleTypes),
