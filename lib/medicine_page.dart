@@ -260,12 +260,6 @@ class _MedicinePageState extends State<MedicinePage> {
                                   ),
                                 ],
                               ),
-                              leading: Text(
-                                _formatTime(medicine.time),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
                             ),
                           );
                         },
