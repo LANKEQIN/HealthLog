@@ -10,6 +10,9 @@ class Medicine {
   /// 药物剂量
   final String dosage;
   
+  /// 剂量单位
+  final String dosageUnit;
+  
   /// 服用说明
   final String schedule;
   
@@ -29,6 +32,7 @@ class Medicine {
   ///
   /// [name] - 药物名称
   /// [dosage] - 药物剂量
+  /// [dosageUnit] - 剂量单位
   /// [schedule] - 服用说明
   /// [time] - 提醒时间
   /// [timesPerDay] - 每日服用次数
@@ -37,6 +41,7 @@ class Medicine {
   Medicine({
     required this.name,
     required this.dosage,
+    required this.dosageUnit,
     required this.schedule,
     required this.time,
     this.timesPerDay = 1,
@@ -51,6 +56,7 @@ class Medicine {
     return {
       'name': name,
       'dosage': dosage,
+      'dosageUnit': dosageUnit,
       'schedule': schedule,
       'time': {
         'hour': time.hour,
@@ -81,6 +87,7 @@ class Medicine {
     return Medicine(
       name: json['name'],
       dosage: json['dosage'],
+      dosageUnit: json['dosageUnit'] ?? '',
       schedule: json['schedule'],
       time: TimeOfDay(
         hour: json['time']['hour'],

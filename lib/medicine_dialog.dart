@@ -44,6 +44,12 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   
   /// 是否饭前服用
   late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
+  
+  /// 剂量单位
+  late String _dosageUnit = widget.medicine?.dosageUnit ?? '毫克';
+
+  /// 预定义的剂量单位列表
+  final List<String> _dosageUnits = ['毫克', '克', '片', '剂', '其他'];
 
   @override
   void initState() {
@@ -120,11 +126,42 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 labelText: '药物名称',
               ),
             ),
-            TextField(
-              controller: _dosageController,
-              decoration: const InputDecoration(
-                labelText: '剂量',
-              ),
+            Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: TextField(
+                    controller: _dosageController,
+                    decoration: const InputDecoration(
+                      labelText: '剂量',
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  flex: 1,
+                  child: DropdownButtonFormField<String>(
+                    value: _dosageUnit,
+                    items: _dosageUnits.map((String unit) {
+                      return DropdownMenuItem<String>(
+                        value: unit,
+                        child: Text(unit),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _dosageUnit = newValue;
+                        });
+                      }
+                    },
+                    decoration: const InputDecoration(
+                      labelText: '单位',
+                    ),
+                  ),
+                ),
+              ],
             ),
             TextField(
               controller: _scheduleController,
@@ -243,6 +280,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               final newMedicine = Medicine(
                 name: _nameController.text,
                 dosage: _dosageController.text,
+                dosageUnit: _dosageUnit,
                 schedule: _scheduleController.text,
                 time: _selectedTime,
                 timesPerDay: _timesPerDay,

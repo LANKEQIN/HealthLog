@@ -181,15 +181,15 @@ class _MedicinePageState extends State<MedicinePage> {
                 ],
               ),
               const SizedBox(height: 10),
-              SizedBox(
-                height: 200,
-                child: _medicines.isEmpty
-                    ? const Center(
-                        child: Text('暂无用药提醒'),
-                      )
-                    : ListView.builder(
-                        itemCount: _medicines.length,
-                        itemBuilder: (context, index) {
+              _medicines.isEmpty
+                  ? const Center(
+                      child: Text('暂无用药提醒'),
+                    )
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _medicines.length,
+                      itemBuilder: (context, index) {
                           final medicine = _medicines[index];
                           return Card(
                             child: ListTile(
@@ -198,7 +198,7 @@ class _MedicinePageState extends State<MedicinePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                                  Text('${medicine.dosage} - ${medicine.schedule}'),
+                                  Text('${medicine.dosage}${medicine.dosageUnit} - ${medicine.schedule}'),
                                   const SizedBox(height: 4),
                                   // 显示服药时间和饭前饭后信息
                                   Row(
@@ -270,7 +270,6 @@ class _MedicinePageState extends State<MedicinePage> {
                           );
                         },
                       ),
-              ),
             ],
           ),
         ),
