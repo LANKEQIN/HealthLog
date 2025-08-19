@@ -32,6 +32,14 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
     _loadData();
   }
 
+  /// 格式化日期显示
+  ///
+  /// [date] - 需要格式化的日期
+  /// 返回格式化后的日期字符串，如 "2023-01-01"
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
   /// 加载存储的健康记录数据
   ///
   /// 从SharedPreferences中读取健康记录数据并更新界面
@@ -102,8 +110,19 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
   /// 删除健康记录
   ///
   /// [index] - 需要删除的健康记录在列表中的索引
-  /// 在删除前显示确认对话框，用户确认后从列表中移除记录并保存更新后的数据
+  /// 直接从列表中移除记录并保存更新后的数据
   void _deleteHealthRecord(int index) {
+    setState(() {
+      _healthRecords.removeAt(index);
+    });
+    _saveHealthRecords();
+  }
+
+  /// 显示删除确认对话框
+  ///
+  /// [index] - 需要删除的健康记录在列表中的索引
+  /// 在删除记录前提示用户确认操作
+  void _showDeleteConfirmationDialog(int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -113,28 +132,21 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(false);
+                Navigator.of(context).pop();
               },
               child: const Text('取消'),
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
+                _deleteHealthRecord(index);
               },
               child: const Text('删除'),
             ),
           ],
         );
       },
-    ).then((confirmed) {
-      // 如果用户确认删除，则更新列表并保存数据
-      if (confirmed == true) {
-        setState(() {
-          _healthRecords.removeAt(index);
-        });
-        _saveHealthRecords();
-      }
-    });
+    );
   }
 
   @override
@@ -177,7 +189,7 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
                           return Card(
                             child: ListTile(
                               title: Text(
-                                '${record.date.year}-${record.date.month.toString().padLeft(2, '0')}-${record.date.day.toString().padLeft(2, '0')}',
+                                _formatDate(record.date),
                               ),
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +210,7 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete),
-                                    onPressed: () => _deleteHealthRecord(index),
+                                    onPressed: () => _showDeleteConfirmationDialog(index),
                                   ),
                                 ],
                               ),
