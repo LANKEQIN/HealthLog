@@ -16,18 +16,33 @@ class Medicine {
   /// 提醒时间
   final TimeOfDay time;
 
+  /// 每日服用次数
+  final int timesPerDay;
+
+  /// 服药时间列表
+  final List<TimeOfDay> scheduleTimes;
+
+  /// 是否饭前服用
+  final bool beforeMeal;
+
   /// 创建Medicine实例
   ///
   /// [name] - 药物名称
   /// [dosage] - 药物剂量
   /// [schedule] - 服用说明
   /// [time] - 提醒时间
+  /// [timesPerDay] - 每日服用次数
+  /// [scheduleTimes] - 服药时间列表
+  /// [beforeMeal] - 是否饭前服用
   Medicine({
     required this.name,
     required this.dosage,
     required this.schedule,
     required this.time,
-  });
+    this.timesPerDay = 1,
+    List<TimeOfDay>? scheduleTimes,
+    this.beforeMeal = false,
+  }) : scheduleTimes = scheduleTimes ?? [time];
 
   /// 将Medicine对象转换为JSON格式的Map
   ///
@@ -41,6 +56,12 @@ class Medicine {
         'hour': time.hour,
         'minute': time.minute,
       },
+      'timesPerDay': timesPerDay,
+      'scheduleTimes': scheduleTimes.map((time) => {
+        'hour': time.hour,
+        'minute': time.minute,
+      }).toList(),
+      'beforeMeal': beforeMeal,
     };
   }
 
@@ -49,6 +70,14 @@ class Medicine {
   /// 用于从存储中恢复数据
   /// [json] - 包含药物信息的JSON数据
   factory Medicine.fromJson(Map<String, dynamic> json) {
+    List<TimeOfDay> times = [];
+    if (json['scheduleTimes'] != null) {
+      times = (json['scheduleTimes'] as List).map((timeJson) => TimeOfDay(
+        hour: timeJson['hour'],
+        minute: timeJson['minute'],
+      )).toList();
+    }
+
     return Medicine(
       name: json['name'],
       dosage: json['dosage'],
@@ -57,6 +86,9 @@ class Medicine {
         hour: json['time']['hour'],
         minute: json['time']['minute'],
       ),
+      timesPerDay: json['timesPerDay'] ?? 1,
+      scheduleTimes: times,
+      beforeMeal: json['beforeMeal'] ?? false,
     );
   }
 }

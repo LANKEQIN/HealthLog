@@ -35,19 +35,45 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   
   /// 选中的提醒时间
   late TimeOfDay _selectedTime = widget.medicine?.time ?? TimeOfDay(hour: 8, minute: 0);
+  
+  /// 每日次数
+  late int _timesPerDay = widget.medicine?.timesPerDay ?? 1;
+  
+  /// 服药时间列表
+  late List<TimeOfDay> _scheduleTimes = List<TimeOfDay>.from(widget.medicine?.scheduleTimes ?? [_selectedTime]);
+  
+  /// 是否饭前服用
+  late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
 
   /// 显示时间选择器
   ///
   /// [context] - 当前上下文
+  /// [initialTime] - 初始时间
   /// 允许用户选择药物提醒时间
-  Future<void> _selectTime(BuildContext context) async {
+  Future<TimeOfDay?> _selectTime(BuildContext context, TimeOfDay initialTime) async {
     final TimeOfDay? picked = await showTimePicker(
       context: context,
-      initialTime: _selectedTime,
+      initialTime: initialTime,
     );
+    return picked;
+  }
+
+  /// 更新指定索引的时间
+  Future<void> _updateScheduleTime(int index) async {
+    final TimeOfDay? picked = await _selectTime(context, _scheduleTimes[index]);
     if (picked != null) {
       setState(() {
-        _selectedTime = picked;
+        _scheduleTimes[index] = picked;
+      });
+    }
+  }
+
+
+  /// 删除指定索引的服药时间
+  void _removeScheduleTime(int index) {
+    if (_scheduleTimes.length > 1) {
+      setState(() {
+        _scheduleTimes.removeAt(index);
       });
     }
   }
@@ -59,36 +85,109 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     
     return AlertDialog(
       title: Text(isEditing ? '编辑药物' : '添加药物'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: _nameController,
-            decoration: const InputDecoration(
-              labelText: '药物名称',
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: _nameController,
+              decoration: const InputDecoration(
+                labelText: '药物名称',
+              ),
             ),
-          ),
-          TextField(
-            controller: _dosageController,
-            decoration: const InputDecoration(
-              labelText: '剂量',
+            TextField(
+              controller: _dosageController,
+              decoration: const InputDecoration(
+                labelText: '剂量',
+              ),
             ),
-          ),
-          TextField(
-            controller: _scheduleController,
-            decoration: const InputDecoration(
-              labelText: '服用说明',
+            TextField(
+              controller: _scheduleController,
+              decoration: const InputDecoration(
+                labelText: '服用说明',
+              ),
             ),
-          ),
-          const SizedBox(height: 10),
-          ListTile(
-            title: const Text('提醒时间'),
-            trailing: Text(
-              '${_selectedTime.hour}:${_selectedTime.minute.toString().padLeft(2, '0')}',
+            const SizedBox(height: 10),
+            // 每日次数选择
+            ListTile(
+              title: const Text('每日次数'),
+              trailing: DropdownButton<int>(
+                value: _timesPerDay,
+                items: List.generate(5, (index) => index + 1).map((int value) {
+                  return DropdownMenuItem<int>(
+                    value: value,
+                    child: Text('$value 次'),
+                  );
+                }).toList(),
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    setState(() {
+                      _timesPerDay = newValue;
+                      // 调整时间列表大小以匹配次数
+                      if (_scheduleTimes.length < _timesPerDay) {
+                        // 添加更多时间项
+                        while (_scheduleTimes.length < _timesPerDay) {
+                          _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
+                        }
+                      } else if (_scheduleTimes.length > _timesPerDay) {
+                        // 移除多余的时间项
+                        _scheduleTimes.removeRange(_timesPerDay, _scheduleTimes.length);
+                      }
+                    });
+                  }
+                },
+              ),
             ),
-            onTap: () => _selectTime(context),
-          ),
-        ],
+            // 服药时间列表
+            Column(
+              children: List.generate(_timesPerDay, (index) {
+                return ListTile(
+                  title: Text('服药时间 ${index + 1}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_scheduleTimes[index].hour}:${_scheduleTimes[index].minute.toString().padLeft(2, '0')}',
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.edit, size: 20),
+                        onPressed: () => _updateScheduleTime(index),
+                      ),
+                      if (_timesPerDay > 1)
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline, size: 20),
+                          onPressed: () => _removeScheduleTime(index),
+                        ),
+                    ],
+                  ),
+                  onTap: () => _updateScheduleTime(index),
+                );
+              }),
+            ),
+            // 饭前饭后选择
+            ListTile(
+              title: const Text('服用时间'),
+              trailing: ToggleButtons(
+                isSelected: [_beforeMeal, !_beforeMeal],
+                onPressed: (int index) {
+                  setState(() {
+                    _beforeMeal = index == 0;
+                  });
+                },
+                children: const [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('饭前'),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 8.0),
+                    child: Text('饭后'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       actions: [
         TextButton(
@@ -107,6 +206,9 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 dosage: _dosageController.text,
                 schedule: _scheduleController.text,
                 time: _selectedTime,
+                timesPerDay: _timesPerDay,
+                scheduleTimes: _scheduleTimes,
+                beforeMeal: _beforeMeal,
               );
               // 返回新创建的药物对象
               Navigator.of(context).pop(newMedicine);

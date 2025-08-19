@@ -186,8 +186,59 @@ class _MedicinePageState extends State<MedicinePage> {
                           return Card(
                             child: ListTile(
                               title: Text(medicine.name),
-                              subtitle: Text(
-                                  '${medicine.dosage} - ${medicine.schedule}'),
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text('${medicine.dosage} - ${medicine.schedule}'),
+                                  const SizedBox(height: 4),
+                                  // 显示服药时间和饭前饭后信息
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '${medicine.timesPerDay}次/天',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        medicine.beforeMeal ? '饭前' : '饭后',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.blue,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  // 显示服药时间列表
+                                  SizedBox(
+                                    height: 20,
+                                    child: ListView(
+                                      scrollDirection: Axis.horizontal,
+                                      children: medicine.scheduleTimes.map((time) {
+                                        return Container(
+                                          margin: const EdgeInsets.only(right: 8),
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey[200],
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ),
+                                ],
+                              ),
                               trailing: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
