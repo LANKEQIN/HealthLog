@@ -28,6 +28,15 @@ class Medicine {
   /// 是否饭前服用
   final bool beforeMeal;
 
+  /// 用药开始日期
+  final DateTime? startDate;
+
+  /// 用药结束日期
+  final DateTime? endDate;
+
+  /// 详细的服药时间类型
+  final List<MedicineScheduleType> scheduleTypes;
+
   /// 创建Medicine实例
   ///
   /// [name] - 药物名称
@@ -38,6 +47,9 @@ class Medicine {
   /// [timesPerDay] - 每日服用次数
   /// [scheduleTimes] - 服药时间列表
   /// [beforeMeal] - 是否饭前服用
+  /// [startDate] - 用药开始日期
+  /// [endDate] - 用药结束日期
+  /// [scheduleTypes] - 详细的服药时间类型列表
   Medicine({
     required this.name,
     required this.dosage,
@@ -47,7 +59,12 @@ class Medicine {
     this.timesPerDay = 1,
     List<TimeOfDay>? scheduleTimes,
     this.beforeMeal = false,
-  }) : scheduleTimes = scheduleTimes ?? [time];
+    this.startDate,
+    this.endDate,
+    List<MedicineScheduleType>? scheduleTypes,
+  }) : 
+       scheduleTimes = scheduleTimes ?? [time],
+       scheduleTypes = scheduleTypes ?? [];
 
   /// 将Medicine对象转换为JSON格式的Map
   ///
@@ -68,6 +85,9 @@ class Medicine {
         'minute': time.minute,
       }).toList(),
       'beforeMeal': beforeMeal,
+      'startDate': startDate?.toIso8601String(),
+      'endDate': endDate?.toIso8601String(),
+      'scheduleTypes': scheduleTypes.map((type) => type.index).toList(),
     };
   }
 
@@ -84,6 +104,11 @@ class Medicine {
       )).toList();
     }
 
+    List<MedicineScheduleType> types = [];
+    if (json['scheduleTypes'] != null) {
+      types = (json['scheduleTypes'] as List).map((typeIndex) => MedicineScheduleType.values[typeIndex]).toList();
+    }
+
     return Medicine(
       name: json['name'],
       dosage: json['dosage'],
@@ -96,8 +121,37 @@ class Medicine {
       timesPerDay: json['timesPerDay'] ?? 1,
       scheduleTimes: times,
       beforeMeal: json['beforeMeal'] ?? false,
+      startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
+      endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
+      scheduleTypes: types,
     );
   }
+}
+
+/// 药物服用时间类型枚举
+///
+/// 定义药物在一天中的服用时间类型，包括早餐、午餐、晚餐前后等
+enum MedicineScheduleType {
+  /// 早餐前
+  beforeBreakfast,
+  
+  /// 早餐后
+  afterBreakfast,
+  
+  /// 午餐前
+  beforeLunch,
+  
+  /// 午餐后
+  afterLunch,
+  
+  /// 晚餐前
+  beforeDinner,
+  
+  /// 晚餐后
+  afterDinner,
+  
+  /// 睡前
+  beforeSleep,
 }
 
 /// 健康记录数据模型

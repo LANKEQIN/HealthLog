@@ -39,6 +39,37 @@ class _MedicinePageState extends State<MedicinePage> {
     return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
   }
 
+  /// 格式化日期显示
+  ///
+  /// [date] - 需要格式化的日期
+  /// 返回格式化后的日期字符串，如 "2023-01-01"
+  String _formatDate(DateTime date) {
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
+
+  /// 获取服药时间类型的显示文本
+  ///
+  /// [type] - 服药时间类型
+  /// 返回对应的中文显示文本
+  String _getScheduleTypeText(MedicineScheduleType type) {
+    switch (type) {
+      case MedicineScheduleType.beforeBreakfast:
+        return '早餐前';
+      case MedicineScheduleType.afterBreakfast:
+        return '早餐后';
+      case MedicineScheduleType.beforeLunch:
+        return '午餐前';
+      case MedicineScheduleType.afterLunch:
+        return '午餐后';
+      case MedicineScheduleType.beforeDinner:
+        return '晚餐前';
+      case MedicineScheduleType.afterDinner:
+        return '晚餐后';
+      case MedicineScheduleType.beforeSleep:
+        return '睡前';
+    }
+  }
+
   // 加载存储的药物数据
   /// 加载存储的药物数据
   ///
@@ -200,6 +231,22 @@ class _MedicinePageState extends State<MedicinePage> {
                                 children: [
                                   Text('${medicine.dosage}${medicine.dosageUnit} - ${medicine.schedule}'),
                                   const SizedBox(height: 4),
+                                  // 显示用药周期
+                                  if (medicine.startDate != null || medicine.endDate != null) ...[
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.date_range, size: 16),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '${medicine.startDate != null ? _formatDate(medicine.startDate!) : '?'} - ${medicine.endDate != null ? _formatDate(medicine.endDate!) : '?'}',
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                  ],
                                   // 显示服药时间和饭前饭后信息
                                   Row(
                                     children: [
@@ -222,6 +269,33 @@ class _MedicinePageState extends State<MedicinePage> {
                                     ],
                                   ),
                                   const SizedBox(height: 4),
+                                  // 显示细化的服药时间类型
+                                  if (medicine.scheduleTypes.isNotEmpty) ...[
+                                    SizedBox(
+                                      height: 20,
+                                      child: ListView(
+                                        scrollDirection: Axis.horizontal,
+                                        children: medicine.scheduleTypes.map((type) {
+                                          return Container(
+                                            margin: const EdgeInsets.only(right: 8),
+                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green[100],
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              _getScheduleTypeText(type),
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.green,
+                                              ),
+                                            ),
+                                          );
+                                        }).toList(),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                  ],
                                   // 显示服药时间列表
                                   SizedBox(
                                     height: 20,
