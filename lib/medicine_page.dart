@@ -31,6 +31,14 @@ class _MedicinePageState extends State<MedicinePage> {
     _loadData();
   }
 
+  /// 格式化时间显示
+  ///
+  /// [time] - 需要格式化的时间
+  /// 返回格式化后的时间字符串，如 "8:00"
+  String _formatTime(TimeOfDay time) {
+    return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
+  }
+
   // 加载存储的药物数据
   /// 加载存储的药物数据
   ///
@@ -228,7 +236,7 @@ class _MedicinePageState extends State<MedicinePage> {
                                             borderRadius: BorderRadius.circular(4),
                                           ),
                                           child: Text(
-                                            '${time.hour}:${time.minute.toString().padLeft(2, '0')}',
+                                            _formatTime(time),
                                             style: const TextStyle(
                                               fontSize: 12,
                                             ),
@@ -253,7 +261,7 @@ class _MedicinePageState extends State<MedicinePage> {
                                 ],
                               ),
                               leading: Text(
-                                '${medicine.time.hour}:${medicine.time.minute.toString().padLeft(2, '0')}',
+                                _formatTime(medicine.time),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                 ),

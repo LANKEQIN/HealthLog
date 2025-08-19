@@ -45,6 +45,23 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   /// 是否饭前服用
   late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeScheduleTimes();
+  }
+
+  /// 初始化服药时间列表
+  void _initializeScheduleTimes() {
+    if (widget.medicine == null) {
+      // 添加模式，初始化默认时间
+      _scheduleTimes = List.generate(_timesPerDay, (index) => TimeOfDay(hour: 8 + index, minute: 0));
+    } else {
+      // 编辑模式，使用现有数据
+      _scheduleTimes = List<TimeOfDay>.from(widget.medicine!.scheduleTimes);
+    }
+  }
+
   /// 显示时间选择器
   ///
   /// [context] - 当前上下文
@@ -68,14 +85,22 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     }
   }
 
-
   /// 删除指定索引的服药时间
   void _removeScheduleTime(int index) {
     if (_scheduleTimes.length > 1) {
       setState(() {
         _scheduleTimes.removeAt(index);
+        _timesPerDay--;
       });
     }
+  }
+
+  /// 添加新的服药时间
+  void _addScheduleTime() {
+    setState(() {
+      _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
+      _timesPerDay++;
+    });
   }
 
   @override
@@ -140,7 +165,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
             ),
             // 服药时间列表
             Column(
-              children: List.generate(_timesPerDay, (index) {
+              children: List.generate(_scheduleTimes.length, (index) {
                 return ListTile(
                   title: Text('服药时间 ${index + 1}'),
                   trailing: Row(
@@ -153,7 +178,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                         icon: const Icon(Icons.edit, size: 20),
                         onPressed: () => _updateScheduleTime(index),
                       ),
-                      if (_timesPerDay > 1)
+                      if (_scheduleTimes.length > 1)
                         IconButton(
                           icon: const Icon(Icons.remove_circle_outline, size: 20),
                           onPressed: () => _removeScheduleTime(index),
@@ -200,6 +225,20 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
           onPressed: () {
             // 检查药物名称是否为空
             if (_nameController.text.isNotEmpty) {
+              // 确保时间列表数量与设定的次数一致
+              if (_scheduleTimes.length != _timesPerDay) {
+                // 调整时间列表大小以匹配次数
+                if (_scheduleTimes.length < _timesPerDay) {
+                  // 添加更多时间项
+                  while (_scheduleTimes.length < _timesPerDay) {
+                    _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
+                  }
+                } else if (_scheduleTimes.length > _timesPerDay) {
+                  // 移除多余的时间项
+                  _scheduleTimes.removeRange(_timesPerDay, _scheduleTimes.length);
+                }
+              }
+              
               // 创建新的药物对象
               final newMedicine = Medicine(
                 name: _nameController.text,
@@ -207,7 +246,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 schedule: _scheduleController.text,
                 time: _selectedTime,
                 timesPerDay: _timesPerDay,
-                scheduleTimes: _scheduleTimes,
+                scheduleTimes: List<TimeOfDay>.from(_scheduleTimes),
                 beforeMeal: _beforeMeal,
               );
               // 返回新创建的药物对象
