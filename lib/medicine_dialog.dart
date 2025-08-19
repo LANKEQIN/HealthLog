@@ -68,12 +68,6 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     }
   }
 
-  /// 添加新的服药时间
-  void _addScheduleTime() {
-    setState(() {
-      _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
-    });
-  }
 
   /// 删除指定索引的服药时间
   void _removeScheduleTime(int index) {
@@ -170,14 +164,6 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 );
               }),
             ),
-            if (_timesPerDay < 5)
-              ListTile(
-                title: ElevatedButton.icon(
-                  onPressed: _addScheduleTime,
-                  icon: const Icon(Icons.add),
-                  label: const Text('添加服药时间'),
-                ),
-              ),
             // 饭前饭后选择
             ListTile(
               title: const Text('服用时间'),
