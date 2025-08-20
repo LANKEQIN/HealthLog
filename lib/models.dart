@@ -180,23 +180,48 @@ class HealthRecord {
   /// 身体状况描述
   final String note;
   
-  /// 血压值（可选）
-  final double? bloodPressure;
+  /// 收缩压（高压，可选）
+  final double? systolicPressure;
+  
+  /// 舒张压（低压，可选）
+  final double? diastolicPressure;
   
   /// 血糖值（可选）
   final double? bloodSugar;
+
+  /// 体重（可选）
+  final double? weight;
+
+  /// 身高（可选）
+  final double? height;
+
+  /// 心率（可选）
+  final int? heartRate;
+
+  /// 体温（可选）
+  final double? temperature;
 
   /// 创建HealthRecord实例
   ///
   /// [date] - 记录日期
   /// [note] - 身体状况描述
-  /// [bloodPressure] - 血压值（可选）
+  /// [systolicPressure] - 收缩压（高压，可选）
+  /// [diastolicPressure] - 舒张压（低压，可选）
   /// [bloodSugar] - 血糖值（可选）
+  /// [weight] - 体重（可选）
+  /// [height] - 身高（可选）
+  /// [heartRate] - 心率（可选）
+  /// [temperature] - 体温（可选）
   HealthRecord({
     required this.date,
     required this.note,
-    this.bloodPressure,
+    this.systolicPressure,
+    this.diastolicPressure,
     this.bloodSugar,
+    this.weight,
+    this.height,
+    this.heartRate,
+    this.temperature,
   });
 
   /// 将HealthRecord对象转换为JSON格式的Map
@@ -206,8 +231,13 @@ class HealthRecord {
     return {
       'date': date.toIso8601String(),
       'note': note,
-      'bloodPressure': bloodPressure,
+      'systolicPressure': systolicPressure,
+      'diastolicPressure': diastolicPressure,
       'bloodSugar': bloodSugar,
+      'weight': weight,
+      'height': height,
+      'heartRate': heartRate,
+      'temperature': temperature,
     };
   }
 
@@ -219,8 +249,13 @@ class HealthRecord {
     return HealthRecord(
       date: DateTime.parse(json['date']),
       note: json['note'],
-      bloodPressure: json['bloodPressure'],
+      systolicPressure: json['systolicPressure'],
+      diastolicPressure: json['diastolicPressure'],
       bloodSugar: json['bloodSugar'],
+      weight: json['weight'],
+      height: json['height'],
+      heartRate: json['heartRate'],
+      temperature: json['temperature'],
     );
   }
 }
