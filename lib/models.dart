@@ -224,3 +224,75 @@ enum AppThemeMode {
   /// 跟随系统设置
   system,
 }
+
+/// 预设药物模板列表
+///
+/// 包含常用药物的预设信息，方便用户快速添加
+class MedicineTemplate {
+  final String name;
+  final String dosage;
+  final String dosageUnit;
+  final String schedule;
+  final int timesPerDay;
+  final List<TimeOfDay> scheduleTimes;
+  final List<MedicineScheduleType> scheduleTypes;
+
+  MedicineTemplate({
+    required this.name,
+    required this.dosage,
+    required this.dosageUnit,
+    required this.schedule,
+    required this.timesPerDay,
+    required this.scheduleTimes,
+    required this.scheduleTypes,
+  });
+
+  /// 预设的常用药物模板
+  static List<MedicineTemplate> get commonMedicines => [
+    MedicineTemplate(
+      name: '阿司匹林',
+      dosage: '100',
+      dosageUnit: '毫克',
+      schedule: '饭后服用，避免空腹',
+      timesPerDay: 1,
+      scheduleTimes: [TimeOfDay(hour: 19, minute: 0)],
+      scheduleTypes: [MedicineScheduleType.afterDinner],
+    ),
+    MedicineTemplate(
+      name: '阿托伐他汀',
+      dosage: '20',
+      dosageUnit: '毫克',
+      schedule: '晚上服用，用水吞服',
+      timesPerDay: 1,
+      scheduleTimes: [TimeOfDay(hour: 20, minute: 0)],
+      scheduleTypes: [MedicineScheduleType.beforeSleep],
+    ),
+    MedicineTemplate(
+      name: '二甲双胍',
+      dosage: '500',
+      dosageUnit: '毫克',
+      schedule: '随餐服用，分次服用',
+      timesPerDay: 2,
+      scheduleTimes: [TimeOfDay(hour: 8, minute: 0), TimeOfDay(hour: 19, minute: 0)],
+      scheduleTypes: [MedicineScheduleType.afterBreakfast, MedicineScheduleType.afterDinner],
+    ),
+    MedicineTemplate(
+      name: '缬沙坦',
+      dosage: '80',
+      dosageUnit: '毫克',
+      schedule: '早上服用，可与食物同服',
+      timesPerDay: 1,
+      scheduleTimes: [TimeOfDay(hour: 8, minute: 0)],
+      scheduleTypes: [MedicineScheduleType.afterBreakfast],
+    ),
+    MedicineTemplate(
+      name: '氨氯地平',
+      dosage: '5',
+      dosageUnit: '毫克',
+      schedule: '每天一次，早上服用',
+      timesPerDay: 1,
+      scheduleTimes: [TimeOfDay(hour: 8, minute: 0)],
+      scheduleTypes: [MedicineScheduleType.afterBreakfast],
+    ),
+  ];
+}

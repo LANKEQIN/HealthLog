@@ -183,6 +183,75 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     }
   }
 
+  /// 从模板创建药物
+  void _createFromTemplate(MedicineTemplate template) {
+    setState(() {
+      _nameController.text = template.name;
+      _dosageController.text = template.dosage;
+      _dosageUnit = template.dosageUnit;
+      _scheduleController.text = template.schedule;
+      _timesPerDay = template.timesPerDay;
+      _scheduleTimes = List<TimeOfDay>.from(template.scheduleTimes);
+      _scheduleTypes = List<MedicineScheduleType>.from(template.scheduleTypes);
+    });
+  }
+
+  /// 显示模板选择对话框
+  void _showTemplateSelectionDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.6,
+          decoration: const BoxDecoration(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(10),
+                height: 5,
+                width: 50,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(5),
+                ),
+              ),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  '选择药物模板',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const Divider(),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: MedicineTemplate.commonMedicines.length,
+                  itemBuilder: (context, index) {
+                    final template = MedicineTemplate.commonMedicines[index];
+                    return ListTile(
+                      title: Text(template.name),
+                      subtitle: Text('${template.dosage} ${template.dosageUnit}'),
+                      trailing: const Icon(Icons.arrow_forward_ios),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        _createFromTemplate(template);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     // 判断当前是编辑模式还是添加模式
@@ -195,6 +264,20 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // 添加从模板选择的按钮
+            if (!isEditing) ...[
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    _showTemplateSelectionDialog(context);
+                  },
+                  icon: const Icon(Icons.library_books),
+                  label: const Text('从模板选择'),
+                ),
+              ),
+              const Divider(),
+            ],
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
