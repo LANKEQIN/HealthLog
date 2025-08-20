@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'medicine_page.dart';
-import 'health_record_page.dart';
-import 'settings_page.dart';
+import 'pages/medicine_page.dart';
+import 'pages/health_record_page.dart';
+import 'pages/settings_page.dart';
+import 'pages/user_profile_page.dart';
 import 'models.dart';
 
 /// 应用程序入口点
@@ -130,7 +131,9 @@ class _MainScreenState extends State<MainScreen> {
     _children = [
       const MedicinePage(),
       const HealthRecordPage(),
+      const UserProfilePage(),
       SettingsPage(onThemeModeChanged: widget.onThemeModeChanged), // 传递回调函数
+      const SettingsPage(), // 添加第四个页面
     ];
   }
 
@@ -154,6 +157,10 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         onTap: onTappedBar,
         currentIndex: _currentIndex,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.medication),
@@ -162,6 +169,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: '统计',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: '档案',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

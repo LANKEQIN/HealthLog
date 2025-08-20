@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'models.dart';
-import 'health_record_dialog.dart';
-import 'edit_health_record_dialog.dart';
+import '../models.dart';
+import '../dialogs/health_record_dialog.dart';
+import '../dialogs/edit_health_record_dialog.dart';
 
 /// 健康记录页面
 ///
@@ -195,10 +195,22 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(record.note),
-                                  if (record.bloodPressure != null)
-                                    Text('血压: ${record.bloodPressure}'),
+                                  if (record.systolicPressure != null && record.diastolicPressure != null)
+                                    Text('血压: ${record.systolicPressure}/${record.diastolicPressure}'),
+                                  if (record.systolicPressure != null && record.diastolicPressure == null)
+                                    Text('收缩压: ${record.systolicPressure}'),
+                                  if (record.systolicPressure == null && record.diastolicPressure != null)
+                                    Text('舒张压: ${record.diastolicPressure}'),
                                   if (record.bloodSugar != null)
                                     Text('血糖: ${record.bloodSugar}'),
+                                  if (record.weight != null)
+                                    Text('体重: ${record.weight} kg'),
+                                  if (record.height != null)
+                                    Text('身高: ${record.height} cm'),
+                                  if (record.heartRate != null)
+                                    Text('心率: ${record.heartRate} bpm'),
+                                  if (record.temperature != null)
+                                    Text('体温: ${record.temperature} °C'),
                                 ],
                               ),
                               trailing: Row(
