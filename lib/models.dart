@@ -265,8 +265,8 @@ class MedicineTemplate {
   static List<MedicineTemplate> get commonMedicines => [
     MedicineTemplate(
       name: '阿司匹林',
-      dosage: '100',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '饭后服用，避免空腹',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 19, minute: 0)],
@@ -274,8 +274,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '阿托伐他汀',
-      dosage: '20',
-      dosageUnit: '毫克',
+      dosage: '2',
+      dosageUnit: '片',
       schedule: '晚上服用，用水吞服',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 20, minute: 0)],
@@ -283,8 +283,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '二甲双胍',
-      dosage: '500',
-      dosageUnit: '毫克',
+      dosage: '5',
+      dosageUnit: '片',
       schedule: '随餐服用，分次服用',
       timesPerDay: 2,
       scheduleTimes: [TimeOfDay(hour: 8, minute: 0), TimeOfDay(hour: 19, minute: 0)],
@@ -292,8 +292,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '缬沙坦',
-      dosage: '80',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '早上服用，可与食物同服',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 8, minute: 0)],
@@ -301,8 +301,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '氨氯地平',
-      dosage: '5',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '每天一次，早上服用',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 8, minute: 0)],
@@ -311,8 +311,8 @@ class MedicineTemplate {
     // 高血压药物 (降压药)
     MedicineTemplate(
       name: '硝苯地平',
-      dosage: '30',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '每日一次，空腹服用',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 7, minute: 0)],
@@ -320,8 +320,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '美托洛尔',
-      dosage: '50',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '每日两次，饭后服用',
       timesPerDay: 2,
       scheduleTimes: [TimeOfDay(hour: 8, minute: 0), TimeOfDay(hour: 19, minute: 0)],
@@ -329,8 +329,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '卡托普利',
-      dosage: '25',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '饭前服用，每日2-3次',
       timesPerDay: 2,
       scheduleTimes: [TimeOfDay(hour: 7, minute: 30), TimeOfDay(hour: 18, minute: 30)],
@@ -338,8 +338,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '厄贝沙坦',
-      dosage: '150',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '每日一次，空腹服用效果更佳',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 7, minute: 0)],
@@ -347,8 +347,8 @@ class MedicineTemplate {
     ),
     MedicineTemplate(
       name: '替米沙坦',
-      dosage: '40',
-      dosageUnit: '毫克',
+      dosage: '1',
+      dosageUnit: '片',
       schedule: '每日一次，可在任何时间服用但应在每天同一时间服用',
       timesPerDay: 1,
       scheduleTimes: [TimeOfDay(hour: 8, minute: 0)],
@@ -493,4 +493,29 @@ class MedicineTemplate {
       scheduleTypes: [MedicineScheduleType.afterBreakfast, MedicineScheduleType.afterLunch, MedicineScheduleType.afterDinner],
     ),
   ];
+}
+
+/// 用户角色枚举
+///
+/// 定义系统的三种用户角色：患者、监护人、医师
+enum UserRole {
+  /// 患者角色
+  patient,
+  
+  /// 监护人角色
+  guardian,
+  
+  /// 医师角色
+  doctor,
+}
+
+/// 性别枚举
+///
+/// 定义用户性别
+enum Gender {
+  /// 男性
+  male,
+  
+  /// 女性
+  female,
 }
