@@ -43,10 +43,19 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   late List<TimeOfDay> _scheduleTimes = List<TimeOfDay>.from(widget.medicine?.scheduleTimes ?? [_selectedTime]);
   
   /// 是否饭前服用
-  late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
+  // late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
   
   /// 剂量单位
   late String _dosageUnit = widget.medicine?.dosageUnit ?? '毫克';
+
+  /// 用药开始日期
+  late DateTime? _startDate = widget.medicine?.startDate;
+
+  /// 用药结束日期
+  late DateTime? _endDate = widget.medicine?.endDate;
+
+  /// 详细的服药时间类型列表
+  late List<MedicineScheduleType> _scheduleTypes = List<MedicineScheduleType>.from(widget.medicine?.scheduleTypes ?? []);
 
   /// 预定义的剂量单位列表
   final List<String> _dosageUnits = ['毫克', '克', '片', '剂', '其他'];
@@ -109,6 +118,71 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     });
   }
 
+  /// 选择开始日期
+  Future<void> _selectStartDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _startDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        _startDate = picked;
+        // 确保结束日期不早于开始日期
+        if (_endDate != null && _endDate!.isBefore(_startDate!)) {
+          _endDate = _startDate;
+        }
+      });
+    }
+  }
+
+  /// 选择结束日期
+  Future<void> _selectEndDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _endDate ?? _startDate ?? DateTime.now(),
+      firstDate: _startDate ?? DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      setState(() {
+        _endDate = picked;
+      });
+    }
+  }
+
+  /// 切换服药时间类型选择
+  void _toggleScheduleType(MedicineScheduleType type) {
+    setState(() {
+      if (_scheduleTypes.contains(type)) {
+        _scheduleTypes.remove(type);
+      } else {
+        _scheduleTypes.add(type);
+      }
+    });
+  }
+
+  /// 获取服药时间类型的显示文本
+  String _getScheduleTypeText(MedicineScheduleType type) {
+    switch (type) {
+      case MedicineScheduleType.beforeBreakfast:
+        return '早餐前';
+      case MedicineScheduleType.afterBreakfast:
+        return '早餐后';
+      case MedicineScheduleType.beforeLunch:
+        return '午餐前';
+      case MedicineScheduleType.afterLunch:
+        return '午餐后';
+      case MedicineScheduleType.beforeDinner:
+        return '晚餐前';
+      case MedicineScheduleType.afterDinner:
+        return '晚餐后';
+      case MedicineScheduleType.beforeSleep:
+        return '睡前';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // 判断当前是编辑模式还是添加模式
@@ -119,6 +193,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             TextField(
               controller: _nameController,
@@ -168,6 +243,50 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               decoration: const InputDecoration(
                 labelText: '服用说明',
               ),
+            ),
+            const SizedBox(height: 10),
+            // 用药周期选择
+            const Text(
+              '用药周期',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectStartDate(context),
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: '开始日期',
+                      ),
+                      child: Text(
+                        _startDate == null
+                            ? '未选择'
+                            : '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _selectEndDate(context),
+                    child: InputDecorator(
+                      decoration: const InputDecoration(
+                        labelText: '结束日期',
+                      ),
+                      child: Text(
+                        _endDate == null
+                            ? '未选择'
+                            : '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}',
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 10),
             // 每日次数选择
@@ -226,28 +345,30 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 );
               }),
             ),
-            // 饭前饭后选择
-            ListTile(
-              title: const Text('服用时间'),
-              trailing: ToggleButtons(
-                isSelected: [_beforeMeal, !_beforeMeal],
-                onPressed: (int index) {
-                  setState(() {
-                    _beforeMeal = index == 0;
-                  });
-                },
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('饭前'),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 8.0),
-                    child: Text('饭后'),
-                  ),
-                ],
+            const SizedBox(height: 10),
+            // 细化的服药时间类型选择
+            const Text(
+              '服药时间类型',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 5),
+            Wrap(
+              spacing: 8.0,
+              runSpacing: 4.0,
+              children: MedicineScheduleType.values.map((type) {
+                final isSelected = _scheduleTypes.contains(type);
+                return FilterChip(
+                  label: Text(_getScheduleTypeText(type)),
+                  selected: isSelected,
+                  onSelected: (_) => _toggleScheduleType(type),
+                );
+              }).toList(),
+            ),
+            const SizedBox(height: 10),
+            // 饭前饭后选择（保留以保持向后兼容性）
+
           ],
         ),
       ),
@@ -285,7 +406,9 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 time: _selectedTime,
                 timesPerDay: _timesPerDay,
                 scheduleTimes: List<TimeOfDay>.from(_scheduleTimes),
-                beforeMeal: _beforeMeal,
+                startDate: _startDate,
+                endDate: _endDate,
+                scheduleTypes: List<MedicineScheduleType>.from(_scheduleTypes),
               );
               // 返回新创建的药物对象
               Navigator.of(context).pop(newMedicine);

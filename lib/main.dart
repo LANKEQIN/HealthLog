@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'medicine_page.dart';
 import 'health_record_page.dart';
+import 'settings_page.dart';
+import 'models.dart';
 
 /// 应用程序入口点
 ///
@@ -11,36 +14,99 @@ void main() {
 
 /// HealthLog应用程序的根组件
 ///
-/// 这是一个无状态组件，用于配置应用程序的主题和主页
-class HealthLogApp extends StatelessWidget {
+/// 这是一个有状态组件，用于配置应用程序的主题和主页
+class HealthLogApp extends StatefulWidget {
   /// 创建HealthLogApp实例
   ///
   /// [key] - 组件的键值
   const HealthLogApp({super.key});
 
   @override
+  State<HealthLogApp> createState() => _HealthLogAppState();
+}
+
+/// HealthLogApp组件的状态类
+///
+/// 管理应用的主题模式
+class _HealthLogAppState extends State<HealthLogApp> {
+  /// 当前应用的主题模式
+  AppThemeMode _themeMode = AppThemeMode.system;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadThemeMode();
+  }
+
+  /// 加载保存的主题设置
+  Future<void> _loadThemeMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    final themeModeString = prefs.getString('theme_mode') ?? 'system';
+    
+    setState(() {
+      switch (themeModeString) {
+        case 'light':
+          _themeMode = AppThemeMode.light;
+          break;
+        case 'dark':
+          _themeMode = AppThemeMode.dark;
+          break;
+        case 'system':
+        default:
+          _themeMode = AppThemeMode.system;
+          break;
+      }
+    });
+  }
+
+  /// 更新主题模式
+  void updateThemeMode(AppThemeMode mode) {
+    setState(() {
+      _themeMode = mode;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HealthLog - 用药日志',
       theme: ThemeData(
-        // 使用蓝色作为主题色
+        // 浅色主题
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
+      darkTheme: ThemeData(
+        // 深色主题
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        useMaterial3: true,
+      ),
+      themeMode: switch (_themeMode) {
+        AppThemeMode.light => ThemeMode.light,
+        AppThemeMode.dark => ThemeMode.dark,
+        AppThemeMode.system => ThemeMode.system,
+      },
       // 设置主页为MainScreen
-      home: const MainScreen(),
+      home: MainScreen(
+        onThemeModeChanged: updateThemeMode,
+      ),
     );
   }
 }
 
 /// 应用程序的主页，包含底部导航栏
 ///
-/// 这是一个有状态组件，用于在药物页面和健康记录页面之间切换
+/// 这是一个有状态组件，用于在药物页面、健康记录页面和设置页面之间切换
 class MainScreen extends StatefulWidget {
+  /// 主题模式变更回调函数
+  final Function(AppThemeMode) onThemeModeChanged;
+  
   /// 创建MainScreen实例
   ///
   /// [key] - 组件的键值
-  const MainScreen({super.key});
+  const MainScreen({super.key, required this.onThemeModeChanged});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -55,11 +121,18 @@ class _MainScreenState extends State<MainScreen> {
 
   /// 页面组件列表
   ///
-  /// 包含药物页面和健康记录页面
-  final List<Widget> _children = [
-    const MedicinePage(),
-    const HealthRecordPage(),
-  ];
+  /// 包含药物页面、健康记录页面和设置页面
+  late final List<Widget> _children;
+
+  @override
+  void initState() {
+    super.initState();
+    _children = [
+      const MedicinePage(),
+      const HealthRecordPage(),
+      SettingsPage(onThemeModeChanged: widget.onThemeModeChanged), // 传递回调函数
+    ];
+  }
 
   /// 底部导航栏点击事件处理函数
   ///
@@ -89,6 +162,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.bar_chart),
             label: '统计',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: '设置',
           ),
         ],
       ),
