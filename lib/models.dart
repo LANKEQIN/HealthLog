@@ -7,6 +7,9 @@ class Medicine {
   /// 药物名称
   final String name;
   
+  /// 药物俗称
+  final String? commonName;
+  
   /// 药物剂量
   final String dosage;
   
@@ -45,6 +48,7 @@ class Medicine {
   /// 创建Medicine实例
   ///
   /// [name] - 药物名称
+  /// [commonName] - 药物俗称
   /// [dosage] - 药物剂量
   /// [dosageUnit] - 剂量单位
   /// [schedule] - 服用说明
@@ -58,6 +62,7 @@ class Medicine {
   /// [isPrescription] - 是否为处方药
   Medicine({
     required this.name,
+    this.commonName,
     required this.dosage,
     required this.dosageUnit,
     required this.schedule,
@@ -79,6 +84,7 @@ class Medicine {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'commonName': commonName,
       'dosage': dosage,
       'dosageUnit': dosageUnit,
       'schedule': schedule,
@@ -119,6 +125,7 @@ class Medicine {
 
     return Medicine(
       name: json['name'],
+      commonName: json['commonName'],
       dosage: json['dosage'],
       dosageUnit: json['dosageUnit'] ?? '',
       schedule: json['schedule'],

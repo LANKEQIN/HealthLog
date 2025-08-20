@@ -299,7 +299,9 @@ class _MedicinePageState extends State<MedicinePage> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          medicine.name,
+                                          medicine.commonName != null && medicine.commonName!.isNotEmpty 
+                                            ? '${medicine.name} (${medicine.commonName})' 
+                                            : medicine.name,
                                           style: const TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,

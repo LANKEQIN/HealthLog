@@ -27,6 +27,9 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   /// 药物名称控制器
   late final _nameController = TextEditingController(text: widget.medicine?.name ?? '');
   
+  /// 药物俗称控制器
+  late final _commonNameController = TextEditingController(text: widget.medicine?.commonName ?? '');
+  
   /// 药物剂量控制器
   late final _dosageController = TextEditingController(text: widget.medicine?.dosage ?? '');
   
@@ -281,12 +284,28 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               ),
               const Divider(),
             ],
+            // 药物名称输入框
             TextField(
               controller: _nameController,
               decoration: const InputDecoration(
-                labelText: '药物名称',
+                labelText: '药物名称 *',
+                border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 16),
+            
+            // 药物俗称输入框
+            TextField(
+              controller: _commonNameController,
+              decoration: const InputDecoration(
+                labelText: '药物俗称（别名）',
+                border: OutlineInputBorder(),
+                hintText: '如：扑热息痛（对乙酰氨基酚）',
+              ),
+            ),
+            const SizedBox(height: 16),
+            
+            // 药物剂量输入框
             Row(
               children: [
                 Expanded(
@@ -518,41 +537,33 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
         ),
         TextButton(
           onPressed: () {
-            // 检查药物名称是否为空
-            if (_nameController.text.isNotEmpty) {
-              // 确保时间列表数量与设定的次数一致
-              if (_scheduleTimes.length != _timesPerDay) {
-                // 调整时间列表大小以匹配次数
-                if (_scheduleTimes.length < _timesPerDay) {
-                  // 添加更多时间项
-                  while (_scheduleTimes.length < _timesPerDay) {
-                    _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
-                  }
-                } else if (_scheduleTimes.length > _timesPerDay) {
-                  // 移除多余的时间项
-                  _scheduleTimes.removeRange(_timesPerDay, _scheduleTimes.length);
-                }
-              }
-              
-              // 创建新的药物对象
-              final newMedicine = Medicine(
-                name: _nameController.text,
-                dosage: _dosageController.text,
-                dosageUnit: _dosageUnit,
-                schedule: _scheduleController.text,
-                time: _selectedTime,
-                timesPerDay: _timesPerDay,
-                scheduleTimes: List<TimeOfDay>.from(_scheduleTimes),
-                startDate: _startDate,
-                endDate: _endDate,
-                scheduleTypes: List<MedicineScheduleType>.from(_scheduleTypes),
-                isPrescription: _isPrescription,
+            if (_nameController.text.isEmpty || _dosageController.text.isEmpty) {
+              // 如果必填字段为空，显示提示信息
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('请填写必填字段')),
               );
-              // 返回新创建的药物对象
-              Navigator.of(context).pop(newMedicine);
+              return;
             }
+            
+            // 创建新的药物对象并返回
+            final newMedicine = Medicine(
+              name: _nameController.text,
+              commonName: _commonNameController.text.isEmpty ? null : _commonNameController.text,
+              dosage: _dosageController.text,
+              dosageUnit: _dosageUnit,
+              schedule: _scheduleController.text,
+              time: _selectedTime,
+              timesPerDay: _timesPerDay,
+              scheduleTimes: _scheduleTimes,
+              startDate: _startDate,
+              endDate: _endDate,
+              scheduleTypes: _scheduleTypes,
+              isPrescription: _isPrescription,
+            );
+            
+            Navigator.of(context).pop(newMedicine);
           },
-          child: Text(isEditing ? '更新' : '添加'),
+          child: const Text('保存'),
         ),
       ],
     );
