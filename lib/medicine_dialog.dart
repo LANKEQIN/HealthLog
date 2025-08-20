@@ -56,6 +56,9 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
 
   /// 详细的服药时间类型列表
   late List<MedicineScheduleType> _scheduleTypes = List<MedicineScheduleType>.from(widget.medicine?.scheduleTypes ?? []);
+  
+  /// 是否为处方药
+  late bool _isPrescription = widget.medicine?.isPrescription ?? false;
 
   /// 预定义的剂量单位列表
   final List<String> _dosageUnits = ['毫克', '克', '片', '剂', '其他'];
@@ -450,6 +453,57 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               }).toList(),
             ),
             const SizedBox(height: 10),
+            // 处方药选择
+            const Text(
+              '药物类型',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 5),
+            Row(
+              children: [
+                Expanded(
+                  child: ListTile(
+                    title: const Text('处方药'),
+                    leading: Radio<bool>(
+                      value: true,
+                      groupValue: _isPrescription,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrescription = value!;
+                        });
+                      },
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _isPrescription = true;
+                      });
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: ListTile(
+                    title: const Text('非处方药'),
+                    leading: Radio<bool>(
+                      value: false,
+                      groupValue: _isPrescription,
+                      onChanged: (value) {
+                        setState(() {
+                          _isPrescription = value!;
+                        });
+                      },
+                    ),
+                    onTap: () {
+                      setState(() {
+                        _isPrescription = false;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
             // 饭前饭后选择（保留以保持向后兼容性）
 
           ],
@@ -492,6 +546,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 startDate: _startDate,
                 endDate: _endDate,
                 scheduleTypes: List<MedicineScheduleType>.from(_scheduleTypes),
+                isPrescription: _isPrescription,
               );
               // 返回新创建的药物对象
               Navigator.of(context).pop(newMedicine);

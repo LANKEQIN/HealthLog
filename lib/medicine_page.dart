@@ -324,6 +324,30 @@ class _MedicinePageState extends State<MedicinePage> {
                                           ),
                                         ),
                                       ),
+                                      // 处方药标记
+                                      if (medicine.isPrescription) 
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 4,
+                                          ),
+                                          margin: const EdgeInsets.only(left: 8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(
+                                              color: Colors.red.withOpacity(0.3),
+                                            ),
+                                          ),
+                                          child: const Text(
+                                            '处方药',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.red,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
                                     ],
                                   ),
                                   const SizedBox(height: 12),

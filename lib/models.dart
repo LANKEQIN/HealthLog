@@ -38,6 +38,9 @@ class Medicine {
 
   /// 详细的服药时间类型
   final List<MedicineScheduleType> scheduleTypes;
+  
+  /// 是否为处方药
+  final bool isPrescription;
 
   /// 创建Medicine实例
   ///
@@ -52,6 +55,7 @@ class Medicine {
   /// [startDate] - 用药开始日期
   /// [endDate] - 用药结束日期
   /// [scheduleTypes] - 详细的服药时间类型列表
+  /// [isPrescription] - 是否为处方药
   Medicine({
     required this.name,
     required this.dosage,
@@ -64,6 +68,7 @@ class Medicine {
     this.startDate,
     this.endDate,
     List<MedicineScheduleType>? scheduleTypes,
+    this.isPrescription = false,
   }) : 
        scheduleTimes = scheduleTimes ?? [time],
        scheduleTypes = scheduleTypes ?? [];
@@ -90,6 +95,7 @@ class Medicine {
       'startDate': startDate?.toIso8601String(),
       'endDate': endDate?.toIso8601String(),
       'scheduleTypes': scheduleTypes.map((type) => type.index).toList(),
+      'isPrescription': isPrescription,
     };
   }
 
@@ -126,6 +132,7 @@ class Medicine {
       startDate: json['startDate'] != null ? DateTime.parse(json['startDate']) : null,
       endDate: json['endDate'] != null ? DateTime.parse(json['endDate']) : null,
       scheduleTypes: types,
+      isPrescription: json['isPrescription'] ?? false,
     );
   }
 }
