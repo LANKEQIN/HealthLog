@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models.dart';
+import '../models.dart';
 
 /// 添加/编辑药物对话框
 ///

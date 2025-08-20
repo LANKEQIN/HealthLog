@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'models.dart';
-import 'health_record_dialog.dart';
-import 'edit_health_record_dialog.dart';
+import '../models.dart';
+import '../dialogs/health_record_dialog.dart';
+import '../dialogs/edit_health_record_dialog.dart';
 
 /// 健康记录页面
 ///

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'models.dart';
-import 'medicine_dialog.dart';
+import '../models.dart';
+import '../dialogs/medicine_dialog.dart';
 
 /// 药物管理页面
 ///

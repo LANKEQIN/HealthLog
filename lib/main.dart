@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'medicine_page.dart';
-import 'health_record_page.dart';
-import 'settings_page.dart';
+import 'pages/medicine_page.dart';
+import 'pages/health_record_page.dart';
+import 'pages/settings_page.dart';
 import 'models.dart';
 
 /// 应用程序入口点

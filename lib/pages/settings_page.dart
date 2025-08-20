@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models.dart';
+import '../models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 设置页面
