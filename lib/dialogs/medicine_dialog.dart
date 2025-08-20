@@ -206,53 +206,13 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   void _showTemplateSelectionDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
       builder: (BuildContext context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.6,
-          decoration: const BoxDecoration(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.all(10),
-                height: 5,
-                width: 50,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(5),
-                ),
-              ),
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  '选择药物模板',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              const Divider(),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: MedicineTemplate.commonMedicines.length,
-                  itemBuilder: (context, index) {
-                    final template = MedicineTemplate.commonMedicines[index];
-                    return ListTile(
-                      title: Text(template.name),
-                      subtitle: Text('${template.dosage} ${template.dosageUnit}'),
-                      trailing: const Icon(Icons.arrow_forward_ios),
-                      onTap: () {
-                        Navigator.of(context).pop();
-                        _createFromTemplate(template);
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
+        return MedicineTemplateSelectionDialog(
+          onTemplateSelected: (template) {
+            Navigator.of(context).pop();
+            _createFromTemplate(template);
+          },
         );
       },
     );
@@ -343,6 +303,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                 ),
               ],
             ),
+            const SizedBox(height: 16),
             TextField(
               controller: _scheduleController,
               decoration: const InputDecoration(
@@ -566,6 +527,273 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
           child: const Text('保存'),
         ),
       ],
+    );
+  }
+}
+
+/// 药品模板选择对话框
+class MedicineTemplateSelectionDialog extends StatefulWidget {
+  final Function(MedicineTemplate) onTemplateSelected;
+
+  const MedicineTemplateSelectionDialog({
+    super.key,
+    required this.onTemplateSelected,
+  });
+
+  @override
+  State<MedicineTemplateSelectionDialog> createState() =>
+      _MedicineTemplateSelectionDialogState();
+}
+
+class _MedicineTemplateSelectionDialogState
+    extends State<MedicineTemplateSelectionDialog> {
+  // 药品分类
+  final Map<String, String> _categories = {
+    'hypertension': '心脑血管用药',
+    'diabetes': '内分泌系统用药',
+    'lipid': '调节血脂用药',
+    'pain': '解热镇痛与感冒用药',
+    'topical': '外用药物',
+    'other': '其他'
+  };
+
+  // 当前选中的分类
+  String _selectedCategory = 'all';
+  
+  // 搜索关键字
+  final TextEditingController _searchController = TextEditingController();
+  
+  // 搜索关键字
+  String _searchKeyword = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchKeyword = _searchController.text.toLowerCase();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  // 根据分类和搜索关键字过滤药品模板
+  List<MedicineTemplate> _filterTemplates() {
+    final allTemplates = MedicineTemplate.commonMedicines;
+    
+    // 如果没有筛选条件，返回所有模板
+    if (_selectedCategory == 'all' && _searchKeyword.isEmpty) {
+      return allTemplates;
+    }
+    
+    // 根据分类筛选
+    List<MedicineTemplate> filteredTemplates = [];
+    if (_selectedCategory == 'all') {
+      filteredTemplates = List.from(allTemplates);
+    } else {
+      // 根据分类名称筛选（这里简化处理，实际应该在模板数据中添加分类字段）
+      switch (_selectedCategory) {
+        case 'hypertension':
+          // 心脑血管用药
+          filteredTemplates = allTemplates.where((template) {
+            final keywords = [
+              '阿司匹林', '阿托伐他汀', '缬沙坦', '氨氯地平', '硝苯地平', 
+              '美托洛尔', '卡托普利', '厄贝沙坦', '替米沙坦', '硫酸氢氯吡格雷', 
+              '华法林', '银杏叶提取物', '曲美他嗪', '尼莫地平'
+            ];
+            return keywords.any((keyword) => template.name.contains(keyword));
+          }).toList();
+          break;
+        case 'diabetes':
+          // 内分泌系统用药（糖尿病药物）
+          filteredTemplates = allTemplates.where((template) {
+            final keywords = [
+              '二甲双胍', '格列美脲', '瑞格列奈', '西格列汀', '恩格列净', '胰岛素'
+            ];
+            return keywords.any((keyword) => template.name.contains(keyword));
+          }).toList();
+          break;
+        case 'lipid':
+          // 调节血脂用药
+          filteredTemplates = allTemplates.where((template) {
+            final keywords = [
+              '阿托伐他汀钙', '瑞舒伐他汀', '辛伐他汀', '非诺贝特', '依折麦布'
+            ];
+            return keywords.any((keyword) => template.name.contains(keyword));
+          }).toList();
+          break;
+        case 'pain':
+          // 解热镇痛与感冒用药（示例中暂无，后续可添加）
+          filteredTemplates = allTemplates.where((template) {
+            final keywords = [];
+            return keywords.any((keyword) => template.name.contains(keyword));
+          }).toList();
+          break;
+        case 'topical':
+          // 外用药物（示例中暂无，后续可添加）
+          filteredTemplates = allTemplates.where((template) {
+            final keywords = [];
+            return keywords.any((keyword) => template.name.contains(keyword));
+          }).toList();
+          break;
+        default:
+          filteredTemplates = List.from(allTemplates);
+      }
+    }
+    
+    // 根据搜索关键字筛选
+    if (_searchKeyword.isNotEmpty) {
+      filteredTemplates = filteredTemplates.where((template) {
+        return template.name.toLowerCase().contains(_searchKeyword) ||
+               template.schedule.toLowerCase().contains(_searchKeyword);
+      }).toList();
+    }
+    
+    return filteredTemplates;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final filteredTemplates = _filterTemplates();
+    
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.8,
+      decoration: const BoxDecoration(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(10),
+            height: 5,
+            width: 50,
+            decoration: BoxDecoration(
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(5),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              '选择药物模板',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          // 搜索框
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: const InputDecoration(
+                hintText: '搜索药品...',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          // 分类选择
+          SizedBox(
+            height: 40,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              children: [
+                ChoiceChip(
+                  label: const Text('全部'),
+                  selected: _selectedCategory == 'all',
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedCategory = selected ? 'all' : 'all';
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ChoiceChip(
+                  label: const Text('心脑血管用药'),
+                  selected: _selectedCategory == 'hypertension',
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedCategory = selected ? 'hypertension' : 'all';
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ChoiceChip(
+                  label: const Text('内分泌系统用药'),
+                  selected: _selectedCategory == 'diabetes',
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedCategory = selected ? 'diabetes' : 'all';
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ChoiceChip(
+                  label: const Text('调节血脂用药'),
+                  selected: _selectedCategory == 'lipid',
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedCategory = selected ? 'lipid' : 'all';
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ChoiceChip(
+                  label: const Text('解热镇痛与感冒用药'),
+                  selected: _selectedCategory == 'pain',
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedCategory = selected ? 'pain' : 'all';
+                    });
+                  },
+                ),
+                const SizedBox(width: 10),
+                ChoiceChip(
+                  label: const Text('外用药物'),
+                  selected: _selectedCategory == 'topical',
+                  onSelected: (selected) {
+                    setState(() {
+                      _selectedCategory = selected ? 'topical' : 'all';
+                    });
+                  },
+                ),
+              ],
+            ),
+          ),
+          const Divider(),
+          Expanded(
+            child: filteredTemplates.isEmpty
+                ? const Center(
+                    child: Text('未找到匹配的药品'),
+                  )
+                : ListView.builder(
+                    itemCount: filteredTemplates.length,
+                    itemBuilder: (context, index) {
+                      final template = filteredTemplates[index];
+                      return ListTile(
+                        title: Text(template.name),
+                        subtitle: Text('${template.dosage} ${template.dosageUnit}'),
+                        trailing: const Icon(Icons.arrow_forward_ios),
+                        onTap: () {
+                          widget.onTemplateSelected(template);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
