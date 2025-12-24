@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models.dart';
 
 /// 用户档案页面
@@ -38,6 +40,55 @@ class _UserProfilePageState extends State<UserProfilePage> {
   final _specialtyController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  /// 加载用户档案信息
+  Future<void> _loadProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final profileJson = prefs.getString('userProfile');
+    
+    if (profileJson != null) {
+      try {
+        final profile = UserProfile.fromJson(json.decode(profileJson));
+        
+        if (mounted) {
+          setState(() {
+            _selectedRole = profile.role;
+            _nameController.text = profile.name;
+            _phoneController.text = profile.phone;
+            _emailController.text = profile.email;
+            _idController.text = profile.idNumber;
+            
+            if (profile.patientInfo != null) {
+              _gender = profile.patientInfo!.gender;
+              _dateOfBirth = profile.patientInfo!.dateOfBirth;
+              _medicalHistoryController.text = profile.patientInfo!.medicalHistory;
+              _allergiesController.text = profile.patientInfo!.allergies;
+            }
+            
+            if (profile.guardianInfo != null) {
+              _relationshipController.text = profile.guardianInfo!.relationship;
+              _emergencyContactController.text = profile.guardianInfo!.emergencyContact;
+            }
+            
+            if (profile.doctorInfo != null) {
+              _hospitalController.text = profile.doctorInfo!.hospital;
+              _departmentController.text = profile.doctorInfo!.department;
+              _licenseNumberController.text = profile.doctorInfo!.licenseNumber;
+              _specialtyController.text = profile.doctorInfo!.specialty;
+            }
+          });
+        }
+      } catch (e) {
+        // 忽略加载错误
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
@@ -55,11 +106,47 @@ class _UserProfilePageState extends State<UserProfilePage> {
   }
 
   /// 保存用户档案信息
-  void _saveProfile() {
-    // TODO: 实现保存逻辑
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('用户档案已保存')),
+  void _saveProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    
+    final profile = UserProfile(
+      role: _selectedRole,
+      name: _nameController.text,
+      phone: _phoneController.text,
+      email: _emailController.text,
+      idNumber: _idController.text,
+      patientInfo: _selectedRole == UserRole.patient && _gender != null && _dateOfBirth != null
+          ? PatientInfo(
+              gender: _gender!,
+              dateOfBirth: _dateOfBirth!,
+              medicalHistory: _medicalHistoryController.text,
+              allergies: _allergiesController.text,
+            )
+          : null,
+      guardianInfo: _selectedRole == UserRole.guardian
+          ? GuardianInfo(
+              relationship: _relationshipController.text,
+              emergencyContact: _emergencyContactController.text,
+            )
+          : null,
+      doctorInfo: _selectedRole == UserRole.doctor
+          ? DoctorInfo(
+              hospital: _hospitalController.text,
+              department: _departmentController.text,
+              licenseNumber: _licenseNumberController.text,
+              specialty: _specialtyController.text,
+            )
+          : null,
     );
+    
+    final profileJson = json.encode(profile.toJson());
+    await prefs.setString('userProfile', profileJson);
+    
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('用户档案已保存')),
+      );
+    }
   }
 
   /// 选择出生日期

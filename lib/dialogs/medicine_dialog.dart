@@ -37,7 +37,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
   late final _scheduleController = TextEditingController(text: widget.medicine?.schedule ?? '');
   
   /// 选中的提醒时间
-  late TimeOfDay _selectedTime = widget.medicine?.time ?? TimeOfDay(hour: 8, minute: 0);
+  late final TimeOfDay _selectedTime = widget.medicine?.time ?? TimeOfDay(hour: 8, minute: 0);
   
   /// 每日次数
   late int _timesPerDay = widget.medicine?.timesPerDay ?? 1;
@@ -116,13 +116,7 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     }
   }
 
-  /// 添加新的服药时间
-  void _addScheduleTime() {
-    setState(() {
-      _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
-      _timesPerDay++;
-    });
-  }
+
 
   /// 选择开始日期
   Future<void> _selectStartDate(BuildContext context) async {
@@ -547,15 +541,7 @@ class MedicineTemplateSelectionDialog extends StatefulWidget {
 
 class _MedicineTemplateSelectionDialogState
     extends State<MedicineTemplateSelectionDialog> {
-  // 药品分类
-  final Map<String, String> _categories = {
-    'hypertension': '心脑血管用药',
-    'diabetes': '内分泌系统用药',
-    'lipid': '调节血脂用药',
-    'pain': '解热镇痛与感冒用药',
-    'topical': '外用药物',
-    'other': '其他'
-  };
+
 
   // 当前选中的分类
   String _selectedCategory = 'all';

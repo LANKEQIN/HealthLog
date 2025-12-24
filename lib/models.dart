@@ -554,3 +554,209 @@ enum Gender {
   /// 女性
   female,
 }
+
+/// 用户档案数据模型
+///
+/// 用于存储和管理用户的基本信息和角色相关信息
+class UserProfile {
+  /// 用户角色
+  final UserRole role;
+  
+  /// 姓名
+  final String name;
+  
+  /// 电话
+  final String phone;
+  
+  /// 邮箱
+  final String email;
+  
+  /// 身份证号
+  final String idNumber;
+  
+  /// 患者特有信息
+  final PatientInfo? patientInfo;
+  
+  /// 监护人特有信息
+  final GuardianInfo? guardianInfo;
+  
+  /// 医师特有信息
+  final DoctorInfo? doctorInfo;
+
+  /// 创建UserProfile实例
+  ///
+  /// [role] - 用户角色
+  /// [name] - 姓名
+  /// [phone] - 电话
+  /// [email] - 邮箱
+  /// [idNumber] - 身份证号
+  /// [patientInfo] - 患者特有信息（可选）
+  /// [guardianInfo] - 监护人特有信息（可选）
+  /// [doctorInfo] - 医师特有信息（可选）
+  UserProfile({
+    required this.role,
+    required this.name,
+    required this.phone,
+    required this.email,
+    required this.idNumber,
+    this.patientInfo,
+    this.guardianInfo,
+    this.doctorInfo,
+  });
+
+  /// 将UserProfile对象转换为JSON格式的Map
+  ///
+  /// 用于数据持久化存储
+  Map<String, dynamic> toJson() {
+    return {
+      'role': role.index,
+      'name': name,
+      'phone': phone,
+      'email': email,
+      'idNumber': idNumber,
+      'patientInfo': patientInfo?.toJson(),
+      'guardianInfo': guardianInfo?.toJson(),
+      'doctorInfo': doctorInfo?.toJson(),
+    };
+  }
+
+  /// 从JSON格式的Map创建UserProfile对象
+  ///
+  /// 用于从存储中恢复数据
+  /// [json] - 包含用户档案信息的JSON数据
+  factory UserProfile.fromJson(Map<String, dynamic> json) {
+    return UserProfile(
+      role: UserRole.values[json['role']],
+      name: json['name'],
+      phone: json['phone'],
+      email: json['email'],
+      idNumber: json['idNumber'],
+      patientInfo: json['patientInfo'] != null 
+          ? PatientInfo.fromJson(json['patientInfo']) 
+          : null,
+      guardianInfo: json['guardianInfo'] != null 
+          ? GuardianInfo.fromJson(json['guardianInfo']) 
+          : null,
+      doctorInfo: json['doctorInfo'] != null 
+          ? DoctorInfo.fromJson(json['doctorInfo']) 
+          : null,
+    );
+  }
+}
+
+/// 患者特有信息
+class PatientInfo {
+  /// 性别
+  final Gender gender;
+  
+  /// 出生日期
+  final DateTime dateOfBirth;
+  
+  /// 病史
+  final String medicalHistory;
+  
+  /// 过敏史
+  final String allergies;
+
+  /// 创建PatientInfo实例
+  PatientInfo({
+    required this.gender,
+    required this.dateOfBirth,
+    required this.medicalHistory,
+    required this.allergies,
+  });
+
+  /// 将PatientInfo对象转换为JSON格式的Map
+  Map<String, dynamic> toJson() {
+    return {
+      'gender': gender.index,
+      'dateOfBirth': dateOfBirth.toIso8601String(),
+      'medicalHistory': medicalHistory,
+      'allergies': allergies,
+    };
+  }
+
+  /// 从JSON格式的Map创建PatientInfo对象
+  factory PatientInfo.fromJson(Map<String, dynamic> json) {
+    return PatientInfo(
+      gender: Gender.values[json['gender']],
+      dateOfBirth: DateTime.parse(json['dateOfBirth']),
+      medicalHistory: json['medicalHistory'],
+      allergies: json['allergies'],
+    );
+  }
+}
+
+/// 监护人特有信息
+class GuardianInfo {
+  /// 与患者关系
+  final String relationship;
+  
+  /// 紧急联系电话
+  final String emergencyContact;
+
+  /// 创建GuardianInfo实例
+  GuardianInfo({
+    required this.relationship,
+    required this.emergencyContact,
+  });
+
+  /// 将GuardianInfo对象转换为JSON格式的Map
+  Map<String, dynamic> toJson() {
+    return {
+      'relationship': relationship,
+      'emergencyContact': emergencyContact,
+    };
+  }
+
+  /// 从JSON格式的Map创建GuardianInfo对象
+  factory GuardianInfo.fromJson(Map<String, dynamic> json) {
+    return GuardianInfo(
+      relationship: json['relationship'],
+      emergencyContact: json['emergencyContact'],
+    );
+  }
+}
+
+/// 医师特有信息
+class DoctorInfo {
+  /// 医院
+  final String hospital;
+  
+  /// 科室
+  final String department;
+  
+  /// 医师执业证书编号
+  final String licenseNumber;
+  
+  /// 专业领域
+  final String specialty;
+
+  /// 创建DoctorInfo实例
+  DoctorInfo({
+    required this.hospital,
+    required this.department,
+    required this.licenseNumber,
+    required this.specialty,
+  });
+
+  /// 将DoctorInfo对象转换为JSON格式的Map
+  Map<String, dynamic> toJson() {
+    return {
+      'hospital': hospital,
+      'department': department,
+      'licenseNumber': licenseNumber,
+      'specialty': specialty,
+    };
+  }
+
+  /// 从JSON格式的Map创建DoctorInfo对象
+  factory DoctorInfo.fromJson(Map<String, dynamic> json) {
+    return DoctorInfo(
+      hospital: json['hospital'],
+      department: json['department'],
+      licenseNumber: json['licenseNumber'],
+      specialty: json['specialty'],
+    );
+  }
+}
