@@ -26,28 +26,28 @@ class AddMedicineDialog extends StatefulWidget {
 class _AddMedicineDialogState extends State<AddMedicineDialog> {
   /// 药物名称控制器
   late final _nameController = TextEditingController(text: widget.medicine?.name ?? '');
-  
+
   /// 药物俗称控制器
   late final _commonNameController = TextEditingController(text: widget.medicine?.commonName ?? '');
-  
+
   /// 药物剂量控制器
   late final _dosageController = TextEditingController(text: widget.medicine?.dosage ?? '');
-  
+
   /// 服用说明控制器
   late final _scheduleController = TextEditingController(text: widget.medicine?.schedule ?? '');
-  
+
   /// 选中的提醒时间
   late final TimeOfDay _selectedTime = widget.medicine?.time ?? TimeOfDay(hour: 8, minute: 0);
-  
+
   /// 每日次数
   late int _timesPerDay = widget.medicine?.timesPerDay ?? 1;
-  
+
   /// 服药时间列表
   late List<TimeOfDay> _scheduleTimes = List<TimeOfDay>.from(widget.medicine?.scheduleTimes ?? [_selectedTime]);
-  
+
   /// 是否饭前服用
   // late bool _beforeMeal = widget.medicine?.beforeMeal ?? false;
-  
+
   /// 剂量单位
   late String _dosageUnit = widget.medicine?.dosageUnit ?? '毫克';
 
@@ -59,9 +59,12 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
 
   /// 详细的服药时间类型列表
   late List<MedicineScheduleType> _scheduleTypes = List<MedicineScheduleType>.from(widget.medicine?.scheduleTypes ?? []);
-  
+
   /// 是否为处方药
   late bool _isPrescription = widget.medicine?.isPrescription ?? false;
+
+  /// 当前步骤索引
+  int _currentStep = 0;
 
   /// 预定义的剂量单位列表
   final List<String> _dosageUnits = ['毫克', '克', '片', '剂', '其他'];
@@ -212,22 +215,373 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
     );
   }
 
+  /// 验证当前步骤的必填字段
+  ///
+  /// 返回 true 表示验证通过，false 表示验证失败
+  bool _validateCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        if (_nameController.text.isEmpty || _dosageController.text.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('请填写药物名称和剂量')),
+          );
+          return false;
+        }
+        return true;
+      case 1:
+        if (_scheduleTimes.isEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('请至少设置一个服药时间')),
+          );
+          return false;
+        }
+        return true;
+      case 2:
+        return true;
+      default:
+        return true;
+    }
+  }
+
+  /// 继续到下一步
+  void _continueStep() {
+    if (_validateCurrentStep()) {
+      setState(() {
+        if (_currentStep < 2) {
+          _currentStep++;
+        }
+      });
+    }
+  }
+
+  /// 返回上一步
+  void _cancelStep() {
+    setState(() {
+      if (_currentStep > 0) {
+        _currentStep--;
+      }
+    });
+  }
+
+  /// 构建第一步：基本信息
+  ///
+  /// 包含药物名称、俗称、剂量、单位和处方药类型
+  Step _buildBasicInfoStep() {
+    return Step(
+      title: const Text('基本信息'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextField(
+            controller: _nameController,
+            decoration: const InputDecoration(
+              labelText: '药物名称 *',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _commonNameController,
+            decoration: const InputDecoration(
+              labelText: '药物俗称（别名）',
+              border: OutlineInputBorder(),
+              hintText: '如：扑热息痛（对乙酰氨基酚）',
+            ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: TextField(
+                  controller: _dosageController,
+                  decoration: const InputDecoration(
+                    labelText: '剂量 *',
+                    border: OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 1,
+                child: DropdownButtonFormField<String>(
+                  value: _dosageUnit,
+                  items: _dosageUnits.map((String unit) {
+                    return DropdownMenuItem<String>(
+                      value: unit,
+                      child: Text(unit),
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      setState(() {
+                        _dosageUnit = newValue;
+                      });
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    labelText: '单位',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '药物类型',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: const Text('处方药'),
+                  leading: Radio<bool>(
+                    value: true,
+                    groupValue: _isPrescription,
+                    onChanged: (value) {
+                      setState(() {
+                        _isPrescription = value!;
+                      });
+                    },
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _isPrescription = true;
+                    });
+                  },
+                ),
+              ),
+              Expanded(
+                child: ListTile(
+                  title: const Text('非处方药'),
+                  leading: Radio<bool>(
+                    value: false,
+                    groupValue: _isPrescription,
+                    onChanged: (value) {
+                      setState(() {
+                        _isPrescription = value!;
+                      });
+                    },
+                  ),
+                  onTap: () {
+                    setState(() {
+                      _isPrescription = false;
+                    });
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      isActive: _currentStep >= 0,
+      state: _currentStep > 0 ? StepState.complete : StepState.editing,
+    );
+  }
+
+  /// 构建第二步：服药安排
+  ///
+  /// 包含每日次数、服药时间和服药时间类型
+  Step _buildScheduleStep() {
+    return Step(
+      title: const Text('服药安排'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            title: const Text('每日次数'),
+            trailing: DropdownButton<int>(
+              value: _timesPerDay,
+              items: List.generate(5, (index) => index + 1).map((int value) {
+                return DropdownMenuItem<int>(
+                  value: value,
+                  child: Text('$value 次'),
+                );
+              }).toList(),
+              onChanged: (int? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _timesPerDay = newValue;
+                    if (_scheduleTimes.length < _timesPerDay) {
+                      while (_scheduleTimes.length < _timesPerDay) {
+                        _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
+                      }
+                    } else if (_scheduleTimes.length > _timesPerDay) {
+                      _scheduleTimes.removeRange(_timesPerDay, _scheduleTimes.length);
+                    }
+                  });
+                }
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            '服药时间',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Column(
+            children: List.generate(_scheduleTimes.length, (index) {
+              return ListTile(
+                title: Text('服药时间 ${index + 1}'),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${_scheduleTimes[index].hour}:${_scheduleTimes[index].minute.toString().padLeft(2, '0')}',
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.edit, size: 20),
+                      onPressed: () => _updateScheduleTime(index),
+                    ),
+                    if (_scheduleTimes.length > 1)
+                      IconButton(
+                        icon: const Icon(Icons.remove_circle_outline, size: 20),
+                        onPressed: () => _removeScheduleTime(index),
+                      ),
+                  ],
+                ),
+                onTap: () => _updateScheduleTime(index),
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '服药时间类型',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 4.0,
+            children: MedicineScheduleType.values.map((type) {
+              final isSelected = _scheduleTypes.contains(type);
+              return FilterChip(
+                label: Text(_getScheduleTypeText(type)),
+                selected: isSelected,
+                onSelected: (_) => _toggleScheduleType(type),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+      isActive: _currentStep >= 1,
+      state: _currentStep > 1 ? StepState.complete : StepState.editing,
+    );
+  }
+
+  /// 构建第三步：用药周期
+  ///
+  /// 包含开始日期、结束日期和服用说明
+  Step _buildCycleStep() {
+    return Step(
+      title: const Text('用药周期'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            '用药周期',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () => _selectStartDate(context),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: '开始日期',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(
+                      _startDate == null
+                          ? '未选择'
+                          : '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}',
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: InkWell(
+                  onTap: () => _selectEndDate(context),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: '结束日期',
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(
+                      _endDate == null
+                          ? '未选择'
+                          : '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}',
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _scheduleController,
+            decoration: const InputDecoration(
+              labelText: '服用说明',
+              border: OutlineInputBorder(),
+              hintText: '如：饭后服用，避免空腹',
+            ),
+            maxLines: 3,
+          ),
+        ],
+      ),
+      isActive: _currentStep >= 2,
+      state: StepState.editing,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // 判断当前是编辑模式还是添加模式
     final isEditing = widget.medicine != null;
-    
-    return AlertDialog(
-      title: Text(isEditing ? '编辑药物' : '添加药物'),
-      content: SingleChildScrollView(
+
+    return Dialog(
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.9,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 添加从模板选择的按钮
-            if (!isEditing) ...[
-              SizedBox(
-                width: double.infinity,
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    isEditing ? '编辑药物' : '添加药物',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.of(context).pop(),
+                  ),
+                ],
+              ),
+            ),
+            if (!isEditing)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: OutlinedButton.icon(
                   onPressed: () {
                     _showTemplateSelectionDialog(context);
@@ -236,291 +590,70 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
                   label: const Text('从模板选择'),
                 ),
               ),
-              const Divider(),
-            ],
-            // 药物名称输入框
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: '药物名称 *',
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // 药物俗称输入框
-            TextField(
-              controller: _commonNameController,
-              decoration: const InputDecoration(
-                labelText: '药物俗称（别名）',
-                border: OutlineInputBorder(),
-                hintText: '如：扑热息痛（对乙酰氨基酚）',
-              ),
-            ),
-            const SizedBox(height: 16),
-            
-            // 药物剂量输入框
-            Row(
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: TextField(
-                    controller: _dosageController,
-                    decoration: const InputDecoration(
-                      labelText: '剂量',
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _dosageUnit,
-                    items: _dosageUnits.map((String unit) {
-                      return DropdownMenuItem<String>(
-                        value: unit,
-                        child: Text(unit),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          _dosageUnit = newValue;
-                        });
-                      }
-                    },
-                    decoration: const InputDecoration(
-                      labelText: '单位',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _scheduleController,
-              decoration: const InputDecoration(
-                labelText: '服用说明',
-              ),
-            ),
-            const SizedBox(height: 10),
-            // 用药周期选择
-            const Text(
-              '用药周期',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectStartDate(context),
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: '开始日期',
-                      ),
-                      child: Text(
-                        _startDate == null
-                            ? '未选择'
-                            : '${_startDate!.year}-${_startDate!.month.toString().padLeft(2, '0')}-${_startDate!.day.toString().padLeft(2, '0')}',
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => _selectEndDate(context),
-                    child: InputDecorator(
-                      decoration: const InputDecoration(
-                        labelText: '结束日期',
-                      ),
-                      child: Text(
-                        _endDate == null
-                            ? '未选择'
-                            : '${_endDate!.year}-${_endDate!.month.toString().padLeft(2, '0')}-${_endDate!.day.toString().padLeft(2, '0')}',
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // 每日次数选择
-            ListTile(
-              title: const Text('每日次数'),
-              trailing: DropdownButton<int>(
-                value: _timesPerDay,
-                items: List.generate(5, (index) => index + 1).map((int value) {
-                  return DropdownMenuItem<int>(
-                    value: value,
-                    child: Text('$value 次'),
-                  );
-                }).toList(),
-                onChanged: (int? newValue) {
-                  if (newValue != null) {
-                    setState(() {
-                      _timesPerDay = newValue;
-                      // 调整时间列表大小以匹配次数
-                      if (_scheduleTimes.length < _timesPerDay) {
-                        // 添加更多时间项
-                        while (_scheduleTimes.length < _timesPerDay) {
-                          _scheduleTimes.add(TimeOfDay(hour: 8, minute: 0));
-                        }
-                      } else if (_scheduleTimes.length > _timesPerDay) {
-                        // 移除多余的时间项
-                        _scheduleTimes.removeRange(_timesPerDay, _scheduleTimes.length);
-                      }
-                    });
-                  }
-                },
-              ),
-            ),
-            // 服药时间列表
-            Column(
-              children: List.generate(_scheduleTimes.length, (index) {
-                return ListTile(
-                  title: Text('服药时间 ${index + 1}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${_scheduleTimes[index].hour}:${_scheduleTimes[index].minute.toString().padLeft(2, '0')}',
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit, size: 20),
-                        onPressed: () => _updateScheduleTime(index),
-                      ),
-                      if (_scheduleTimes.length > 1)
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline, size: 20),
-                          onPressed: () => _removeScheduleTime(index),
+            Flexible(
+              child: Stepper(
+                currentStep: _currentStep,
+                onStepContinue: _continueStep,
+                onStepCancel: _cancelStep,
+                controlsBuilder: (BuildContext context, ControlsDetails details) {
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Row(
+                      children: [
+                        if (_currentStep < 2)
+                          ElevatedButton(
+                            onPressed: details.onStepContinue,
+                            child: const Text('下一步'),
+                          ),
+                        if (_currentStep == 2)
+                          ElevatedButton(
+                            onPressed: () {
+                              if (_validateCurrentStep()) {
+                                final newMedicine = Medicine(
+                                  name: _nameController.text,
+                                  commonName: _commonNameController.text.isEmpty ? null : _commonNameController.text,
+                                  dosage: _dosageController.text,
+                                  dosageUnit: _dosageUnit,
+                                  schedule: _scheduleController.text,
+                                  time: _selectedTime,
+                                  timesPerDay: _timesPerDay,
+                                  scheduleTimes: _scheduleTimes,
+                                  startDate: _startDate,
+                                  endDate: _endDate,
+                                  scheduleTypes: _scheduleTypes,
+                                  isPrescription: _isPrescription,
+                                );
+                                Navigator.of(context).pop(newMedicine);
+                              }
+                            },
+                            child: const Text('保存'),
+                          ),
+                        if (_currentStep > 0)
+                          const SizedBox(width: 8),
+                        if (_currentStep > 0)
+                          TextButton(
+                            onPressed: details.onStepCancel,
+                            child: const Text('上一步'),
+                          ),
+                        const SizedBox(width: 8),
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('取消'),
                         ),
-                    ],
-                  ),
-                  onTap: () => _updateScheduleTime(index),
-                );
-              }),
-            ),
-            const SizedBox(height: 10),
-            // 细化的服药时间类型选择
-            const Text(
-              '服药时间类型',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
+                      ],
+                    ),
+                  );
+                },
+                steps: [
+                  _buildBasicInfoStep(),
+                  _buildScheduleStep(),
+                  _buildCycleStep(),
+                ],
               ),
             ),
-            const SizedBox(height: 5),
-            Wrap(
-              spacing: 8.0,
-              runSpacing: 4.0,
-              children: MedicineScheduleType.values.map((type) {
-                final isSelected = _scheduleTypes.contains(type);
-                return FilterChip(
-                  label: Text(_getScheduleTypeText(type)),
-                  selected: isSelected,
-                  onSelected: (_) => _toggleScheduleType(type),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: 10),
-            // 处方药选择
-            const Text(
-              '药物类型',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 5),
-            Row(
-              children: [
-                Expanded(
-                  child: ListTile(
-                    title: const Text('处方药'),
-                    leading: Radio<bool>(
-                      value: true,
-                      groupValue: _isPrescription,
-                      onChanged: (value) {
-                        setState(() {
-                          _isPrescription = value!;
-                        });
-                      },
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _isPrescription = true;
-                      });
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: ListTile(
-                    title: const Text('非处方药'),
-                    leading: Radio<bool>(
-                      value: false,
-                      groupValue: _isPrescription,
-                      onChanged: (value) {
-                        setState(() {
-                          _isPrescription = value!;
-                        });
-                      },
-                    ),
-                    onTap: () {
-                      setState(() {
-                        _isPrescription = false;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            // 饭前饭后选择（保留以保持向后兼容性）
-
           ],
         ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: const Text('取消'),
-        ),
-        TextButton(
-          onPressed: () {
-            if (_nameController.text.isEmpty || _dosageController.text.isEmpty) {
-              // 如果必填字段为空，显示提示信息
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('请填写必填字段')),
-              );
-              return;
-            }
-            
-            // 创建新的药物对象并返回
-            final newMedicine = Medicine(
-              name: _nameController.text,
-              commonName: _commonNameController.text.isEmpty ? null : _commonNameController.text,
-              dosage: _dosageController.text,
-              dosageUnit: _dosageUnit,
-              schedule: _scheduleController.text,
-              time: _selectedTime,
-              timesPerDay: _timesPerDay,
-              scheduleTimes: _scheduleTimes,
-              startDate: _startDate,
-              endDate: _endDate,
-              scheduleTypes: _scheduleTypes,
-              isPrescription: _isPrescription,
-            );
-            
-            Navigator.of(context).pop(newMedicine);
-          },
-          child: const Text('保存'),
-        ),
-      ],
     );
   }
 }
