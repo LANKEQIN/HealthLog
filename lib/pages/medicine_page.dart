@@ -39,15 +39,6 @@ class _MedicinePageState extends State<MedicinePage> {
     return '${time.hour}:${time.minute.toString().padLeft(2, '0')}';
   }
 
-  /// 格式化日期显示
-  ///
-  /// [date] - 需要格式化的日期
-  /// 返回格式化后的日期字符串，如 "2023-01-01"
-  String _formatDate(DateTime? date) {
-    if (date == null) return '';
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-
   /// 简化格式化日期显示
   ///
   /// [date] - 需要格式化的日期
@@ -314,7 +305,7 @@ class _MedicinePageState extends State<MedicinePage> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).primaryColor.withOpacity(0.1),
+                                          color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(12),
                                         ),
                                         child: Text(
@@ -335,10 +326,10 @@ class _MedicinePageState extends State<MedicinePage> {
                                           ),
                                           margin: const EdgeInsets.only(left: 8),
                                           decoration: BoxDecoration(
-                                            color: Colors.red.withOpacity(0.1),
+                                            color: Colors.red.withValues(alpha: 0.1),
                                             borderRadius: BorderRadius.circular(12),
                                             border: Border.all(
-                                              color: Colors.red.withOpacity(0.3),
+                                              color: Colors.red.withValues(alpha: 0.3),
                                             ),
                                           ),
                                           child: const Text(
@@ -392,10 +383,10 @@ class _MedicinePageState extends State<MedicinePage> {
                                           vertical: 6,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                          color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.1),
                                           borderRadius: BorderRadius.circular(20),
                                           border: Border.all(
-                                            color: Theme.of(context).colorScheme.secondary.withOpacity(0.3),
+                                            color: Theme.of(context).colorScheme.secondary.withValues(alpha: 0.3),
                                           ),
                                         ),
                                         child: Row(

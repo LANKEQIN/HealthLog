@@ -63,7 +63,6 @@ class _SettingsPageState extends State<SettingsPage> {
         modeString = 'dark';
         break;
       case AppThemeMode.system:
-      default:
         modeString = 'system';
         break;
     }
