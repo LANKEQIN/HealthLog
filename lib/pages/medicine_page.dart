@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../app_state.dart';
 import '../models.dart';
 import '../dialogs/medicine_dialog.dart';
+import '../services/notification_service.dart';
 
 /// 药物管理页面
 ///
@@ -29,6 +31,8 @@ class _MedicinePageState extends State<MedicinePage> {
     super.initState();
     // 初始化时加载药物数据
     _loadData();
+    // 首次进入用药页时申请通知与精确闹钟权限，让提醒真正可用
+    NotificationService.instance.requestPermissions();
   }
 
   /// 格式化时间显示
@@ -76,16 +80,14 @@ class _MedicinePageState extends State<MedicinePage> {
   ///
   /// 从SharedPreferences中读取药物数据并更新界面
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // 从SharedPreferences加载药物数据，如果没有则返回空数组
-    final medicinesJson = prefs.getString('medicines') ?? '[]';
-    final medicinesList = json.decode(medicinesJson) as List;
-    _medicines.clear();
-    // 将JSON数据转换为Medicine对象并添加到列表中
-    _medicines.addAll(medicinesList.map((e) => Medicine.fromJson(e)).toList());
-    
-    setState(() {});
+    // 统一走 app_state 的读取方法，避免各处重复写反序列化逻辑
+    final medicines = await loadMedicines();
+    if (!mounted) return;
+    setState(() {
+      _medicines
+        ..clear()
+        ..addAll(medicines);
+    });
   }
 
   // 保存药物数据
@@ -96,7 +98,10 @@ class _MedicinePageState extends State<MedicinePage> {
     final prefs = await SharedPreferences.getInstance();
     // 将药物列表转换为JSON格式并保存
     final medicinesJson = json.encode(_medicines.map((e) => e.toJson()).toList());
-    await prefs.setString('medicines', medicinesJson);
+    await prefs.setString(kKeyMedicines, medicinesJson);
+    // 添加/编辑/删除最终都会走到这里，因此只需在这一处重建提醒即可覆盖全部变化。
+    // 采用全量重排：无需判断具体改了什么，也不会因列表索引变化残留旧通知。
+    await NotificationService.instance.syncAll(_medicines);
   }
 
   /// 添加新药物

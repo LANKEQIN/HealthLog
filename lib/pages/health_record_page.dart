@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../app_state.dart';
 import '../models.dart';
 import '../dialogs/health_record_dialog.dart';
 import '../dialogs/edit_health_record_dialog.dart';
@@ -44,16 +45,14 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
   ///
   /// 从SharedPreferences中读取健康记录数据并更新界面
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
-    
-    // 从SharedPreferences加载健康记录数据，如果没有则返回空数组
-    final recordsJson = prefs.getString('healthRecords') ?? '[]';
-    final recordsList = json.decode(recordsJson) as List;
-    _healthRecords.clear();
-    // 将JSON数据转换为HealthRecord对象并添加到列表中
-    _healthRecords.addAll(recordsList.map((e) => HealthRecord.fromJson(e)).toList());
-    
-    setState(() {});
+    // 统一走 app_state 的读取方法，避免各处重复写反序列化逻辑
+    final records = await loadHealthRecords();
+    if (!mounted) return;
+    setState(() {
+      _healthRecords
+        ..clear()
+        ..addAll(records);
+    });
   }
 
   /// 保存健康记录数据
@@ -63,7 +62,7 @@ class _HealthRecordPageState extends State<HealthRecordPage> {
     final prefs = await SharedPreferences.getInstance();
     // 将健康记录列表转换为JSON格式并保存
     final recordsJson = json.encode(_healthRecords.map((e) => e.toJson()).toList());
-    await prefs.setString('healthRecords', recordsJson);
+    await prefs.setString(kKeyHealthRecords, recordsJson);
   }
 
   /// 添加健康记录

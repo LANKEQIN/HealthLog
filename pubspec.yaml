@@ -36,6 +36,19 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.3.2
 
+  # 统计页折线图（1.x 使用单数 color 参数）
+  fl_chart: ^1.0.0
+  # 本地用药提醒通知（锁定 20.x：21+ 要求 AGP 8.11.1 / compileSdk 36，当前工程 AGP 为 8.7.3）
+  flutter_local_notifications: ^20.1.0
+  # 通知按本地时区调度所需的时区库
+  timezone: ^0.10.0
+  # 读取设备所在时区，供上面的时区库使用（5.x 返回 TimezoneInfo）
+  flutter_timezone: ^5.1.0
+  # 备份文件默认存放目录
+  path_provider: ^2.1.0
+  # 选择备份导出位置 / 选择要导入的备份文件（锁定 11.x：12+ 改用 pickFile 返回 List）
+  file_picker: ^11.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

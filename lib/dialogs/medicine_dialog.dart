@@ -306,7 +306,10 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
               Expanded(
                 flex: 1,
                 child: DropdownButtonFormField<String>(
-                  value: _dosageUnit,
+                  // 用 initialValue + key：套用模板会从外部改写 _dosageUnit，
+                  // key 变化让控件重新初始化，才能显示出新的单位
+                  key: ValueKey(_dosageUnit),
+                  initialValue: _dosageUnit,
                   items: _dosageUnits.map((String unit) {
                     return DropdownMenuItem<String>(
                       value: unit,
@@ -336,47 +339,42 @@ class _AddMedicineDialogState extends State<AddMedicineDialog> {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: ListTile(
-                  title: const Text('处方药'),
-                  leading: Radio<bool>(
-                    value: true,
-                    groupValue: _isPrescription,
-                    onChanged: (value) {
+          // 由 RadioGroup 统一管理选中值，Radio 只声明自身取值
+          RadioGroup<bool>(
+            groupValue: _isPrescription,
+            onChanged: (value) {
+              if (value != null) {
+                setState(() {
+                  _isPrescription = value;
+                });
+              }
+            },
+            child: Row(
+              children: [
+                Expanded(
+                  child: ListTile(
+                    title: const Text('处方药'),
+                    leading: const Radio<bool>(value: true),
+                    onTap: () {
                       setState(() {
-                        _isPrescription = value!;
+                        _isPrescription = true;
                       });
                     },
                   ),
-                  onTap: () {
-                    setState(() {
-                      _isPrescription = true;
-                    });
-                  },
                 ),
-              ),
-              Expanded(
-                child: ListTile(
-                  title: const Text('非处方药'),
-                  leading: Radio<bool>(
-                    value: false,
-                    groupValue: _isPrescription,
-                    onChanged: (value) {
+                Expanded(
+                  child: ListTile(
+                    title: const Text('非处方药'),
+                    leading: const Radio<bool>(value: false),
+                    onTap: () {
                       setState(() {
-                        _isPrescription = value!;
+                        _isPrescription = false;
                       });
                     },
                   ),
-                  onTap: () {
-                    setState(() {
-                      _isPrescription = false;
-                    });
-                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ],
       ),

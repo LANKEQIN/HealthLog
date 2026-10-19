@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../app_state.dart';
 import '../models.dart';
 
 /// 用户档案页面
@@ -47,45 +48,43 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   /// 加载用户档案信息
   Future<void> _loadProfile() async {
-    final prefs = await SharedPreferences.getInstance();
-    final profileJson = prefs.getString('userProfile');
-    
-    if (profileJson != null) {
-      try {
-        final profile = UserProfile.fromJson(json.decode(profileJson));
-        
-        if (mounted) {
-          setState(() {
-            _selectedRole = profile.role;
-            _nameController.text = profile.name;
-            _phoneController.text = profile.phone;
-            _emailController.text = profile.email;
-            _idController.text = profile.idNumber;
-            
-            if (profile.patientInfo != null) {
-              _gender = profile.patientInfo!.gender;
-              _dateOfBirth = profile.patientInfo!.dateOfBirth;
-              _medicalHistoryController.text = profile.patientInfo!.medicalHistory;
-              _allergiesController.text = profile.patientInfo!.allergies;
-            }
-            
-            if (profile.guardianInfo != null) {
-              _relationshipController.text = profile.guardianInfo!.relationship;
-              _emergencyContactController.text = profile.guardianInfo!.emergencyContact;
-            }
-            
-            if (profile.doctorInfo != null) {
-              _hospitalController.text = profile.doctorInfo!.hospital;
-              _departmentController.text = profile.doctorInfo!.department;
-              _licenseNumberController.text = profile.doctorInfo!.licenseNumber;
-              _specialtyController.text = profile.doctorInfo!.specialty;
-            }
-          });
-        }
-      } catch (e) {
-        // 忽略加载错误
-      }
+    UserProfile? profile;
+    try {
+      // 统一走 app_state 的读取方法，避免各处重复写反序列化逻辑
+      profile = await loadUserProfile();
+    } catch (_) {
+      // 本地档案数据损坏时忽略，保持空白表单
+      return;
     }
+    final loaded = profile;
+    if (loaded == null || !mounted) return;
+
+    setState(() {
+      _selectedRole = loaded.role;
+      _nameController.text = loaded.name;
+      _phoneController.text = loaded.phone;
+      _emailController.text = loaded.email;
+      _idController.text = loaded.idNumber;
+
+      if (loaded.patientInfo != null) {
+        _gender = loaded.patientInfo!.gender;
+        _dateOfBirth = loaded.patientInfo!.dateOfBirth;
+        _medicalHistoryController.text = loaded.patientInfo!.medicalHistory;
+        _allergiesController.text = loaded.patientInfo!.allergies;
+      }
+
+      if (loaded.guardianInfo != null) {
+        _relationshipController.text = loaded.guardianInfo!.relationship;
+        _emergencyContactController.text = loaded.guardianInfo!.emergencyContact;
+      }
+
+      if (loaded.doctorInfo != null) {
+        _hospitalController.text = loaded.doctorInfo!.hospital;
+        _departmentController.text = loaded.doctorInfo!.department;
+        _licenseNumberController.text = loaded.doctorInfo!.licenseNumber;
+        _specialtyController.text = loaded.doctorInfo!.specialty;
+      }
+    });
   }
 
   @override
@@ -140,7 +139,7 @@ class _UserProfilePageState extends State<UserProfilePage> {
     );
     
     final profileJson = json.encode(profile.toJson());
-    await prefs.setString('userProfile', profileJson);
+    await prefs.setString(kKeyUserProfile, profileJson);
     
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -166,11 +165,8 @@ class _UserProfilePageState extends State<UserProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    // 不再自带 AppBar：标题栏由 MainScreen 统一提供，避免出现双层标题栏
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('用户档案'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -300,37 +296,30 @@ class _UserProfilePageState extends State<UserProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('性别', style: TextStyle(fontWeight: FontWeight.w500)),
-        Row(
-          children: [
-            Expanded(
-              child: ListTile(
-                title: const Text('男'),
-                leading: Radio<Gender>(
-                  value: Gender.male,
-                  groupValue: _gender,
-                  onChanged: (Gender? value) {
-                    setState(() {
-                      _gender = value;
-                    });
-                  },
+        // 由 RadioGroup 统一管理选中值，Radio 只声明自身取值
+        RadioGroup<Gender>(
+          groupValue: _gender,
+          onChanged: (value) {
+            setState(() {
+              _gender = value;
+            });
+          },
+          child: Row(
+            children: [
+              Expanded(
+                child: ListTile(
+                  title: const Text('男'),
+                  leading: const Radio<Gender>(value: Gender.male),
                 ),
               ),
-            ),
-            Expanded(
-              child: ListTile(
-                title: const Text('女'),
-                leading: Radio<Gender>(
-                  value: Gender.female,
-                  groupValue: _gender,
-                  onChanged: (Gender? value) {
-                    setState(() {
-                      _gender = value;
-                    });
-                  },
+              Expanded(
+                child: ListTile(
+                  title: const Text('女'),
+                  leading: const Radio<Gender>(value: Gender.female),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );

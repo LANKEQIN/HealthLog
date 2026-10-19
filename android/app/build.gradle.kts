@@ -11,6 +11,8 @@ android {
     ndkVersion = "27.0.12077973"
 
     compileOptions {
+        // 通知插件依赖 Java 8+ 的时间 API，必须开启 core library desugaring
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -28,6 +30,8 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        // desugaring 会引入额外方法，开启多 dex 以避免方法数超限
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -41,4 +45,9 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // 通知插件所需的 Java 8+ 时间 API 脱糖支持
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }
